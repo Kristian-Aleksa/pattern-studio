@@ -117,49 +117,8 @@ docs/screenshots/ the pictures in this README
 
 ## Building
 
-Edit the files in `src/`, then run (Python 3.10 or newer, no packages needed):
+The app is built from the files in `src/`. After changing them, run `python3 build.py` (Python 3.10 or newer, no packages needed) to rebuild `public/index.html`, the single file the website serves.
 
-```
-python3 build.py      # -> public/index.html
-```
+## Credits
 
-The build inlines every source file into `public/index.html` and refuses to build if anything in the page
-would reach the internet. Commit `src/` and the rebuilt `public/index.html` together.
-
-## Hosting
-
-The site is static: `vercel.json` tells Vercel there is no framework and no build step and to serve the
-`public/` folder. Every commit to `main` redeploys it. Any static host works the same way: serve
-`public/index.html`.
-
-## Adding a style
-
-1. Create `src/tools/<name>.js` that calls `PL.tools.register({...})`. The notes at the top of
-   `src/core/tools.js` describe a definition; `tools/sonar.js` (vector) and `tools/culture.js` (pixel)
-   are good examples. A style needs:
-   - `params`: sliders, segmented choices, toggles, chips, selects or text fields. The app builds the
-     controls from them; `rand: [lo, hi]` or `randChoices` say what New variation may pick.
-   - `inks`: the color roles, the min / max number of colors, and how a palette is fitted to them.
-   - `palettes`: the presets (`defaults.palette` names the one the style opens on).
-   - Either `build(args)` returning a `PL.Scene` (vector) or `raster: true` with `paint(args)` drawing
-     into a canvas (pixel). `t` runs from 0 to 1 across the loop; use 4D noise on a circle or closed
-     paths so the last frame flows into the first.
-2. Add `/*@inline tools/<name>.js*/` to `src/index.html`, after the other styles.
-3. Give it a first seed in `FIRST_SEEDS` in `src/ui/app.js`.
-4. Run `python3 build.py`.
-
-The new style appears on the home page and in the style menu, with colors, Effects, General, animation,
-history, kept variations, exports and the library working for it automatically.
-
-## Footer links
-
-The GitHub and Contact links under the home page cards are set in `LINKS` near the end of
-`src/ui/app.js` (a web address, or `mailto:` for Contact). While one is empty its link says it is coming
-soon.
-
-## Fonts and notices
-
-The interface uses system fonts only. Atlas draws its type with Atlas Mono: outlines derived from
-DejaVu Sans Mono 2.37 (Bitstream Vera licence; the DejaVu changes are in the public domain), with a slashed
-zero and a few other changes. The licence notice is kept at the top of `src/core/glyphs.js` and, as the
-licence asks, the modified outlines go by another name.
+The interface uses system fonts only. The Atlas style draws its letters with Atlas Mono, outlines derived from DejaVu Sans Mono (Bitstream Vera license; the license notice is at the top of `src/core/glyphs.js`).
