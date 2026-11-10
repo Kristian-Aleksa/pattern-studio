@@ -2179,6 +2179,26 @@ PL.app = (() => {
     }
   });
 
+  /* ------------------------------------------------------------ visit counts (the website only) */
+  // On the website the page loads Vercel Web Analytics, which counts anonymous visits and page views
+  // (no third-party cookies; the Vercel project has Web Analytics switched on). Opened from a file on a
+  // computer (this app, a downloaded or saved copy) or from a test server on the same computer, nothing is
+  // loaded or sent. Your patterns, colors and settings are never part of it.
+  const ANALYTICS_SRC = '/_vercel/insights/script.js';
+  function countVisits() {
+    const host = location.hostname;
+    if (!/^https?:$/.test(location.protocol) || !host || /^(localhost|127\.\d+\.\d+\.\d+|0\.0\.0\.0|\[::1\])$/.test(host)) return;
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    const s = document.createElement('script');
+    s.defer = true;
+    s.src = ANALYTICS_SRC;
+    s.addEventListener('load', () => {
+      const note = document.querySelector('.side-foot .offline');
+      if (note) note.title = 'Your patterns never leave your browser. This website counts anonymous visits.';
+    });
+    document.head.appendChild(s);
+  }
+
   /* ------------------------------------------------------------ boot */
   function boot() {
     buildStylePick();
@@ -2189,6 +2209,7 @@ PL.app = (() => {
     commit();
     applyRoute();
     booted = true;
+    countVisits();
   }
   boot();
 

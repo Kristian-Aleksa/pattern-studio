@@ -3,8 +3,9 @@
 A generative pattern tool with 23 fully customizable styles. Make backgrounds for social media posts,
 websites, presentations or anything else, then export them as images, SVGs or seamless video loops.
 
-Everything runs in the browser: no account, no server, no tracking. Nothing is uploaded or fetched, and the
-whole app is a single HTML file that also works offline.
+Everything runs in the browser: no account, no server, and your patterns are never uploaded. The whole app
+is a single HTML file that also works offline. The website counts anonymous visits with Vercel Web Analytics
+(no third-party cookies); the app file on your computer never sends anything.
 
 ![Pattern Studio's home page: a card with a live preview for each of the 23 styles](docs/screenshots/home.png)
 
