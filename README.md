@@ -15,7 +15,11 @@ is a single HTML file that also works offline. The website counts anonymous visi
 - **Offline:** open `public/index.html` in Chrome, Edge, Firefox or Safari (double-click it). It is the
   complete app in one file, so it can be renamed (for example `Pattern Studio.html`), copied and shared.
 
-Pick a style on the home page, then:
+On the home page, **Play previews** plays every card's loop at once; when it's off, a card plays when you
+point at it. On phones and tablets there's no button: the cards on screen play on their own. The order menu
+sorts the styles: oldest to newest, newest to oldest, A to Z or Z to A.
+
+Pick a style, then:
 
 - **New variation** (Space, or a click on the artboard) draws a new pattern; **N** keeps the settings with a
   new seed, **C** picks new colors and **R** rotates the colors through their roles. Locked colors stay put.

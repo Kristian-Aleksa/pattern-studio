@@ -42,6 +42,8 @@ PL.app = (() => {
     drop: '<path d="M8 2.2s4.6 4.7 4.6 7.7a4.6 4.6 0 0 1-9.2 0C3.4 6.9 8 2.2 8 2.2z"/>',
     play: '<path d="M5 3.3v9.4L12.6 8z" fill="currentColor"/>',
     pause: '<path d="M5 3.5v9M11 3.5v9" stroke-width="2.2"/>',
+    stop: '<rect x="4.2" y="4.2" width="7.6" height="7.6" rx="1.4" fill="currentColor" stroke="none"/>',
+    sort: '<path d="M5 13V3M2.6 5.4 5 3l2.4 2.4M11 3v10M8.6 10.6 11 13l2.4-2.4"/>',
     keep: '<path d="M4 2.5h8v11l-4-2.8-4 2.8z"/>',
     down: '<path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/>',
     copy: '<rect x="5.5" y="5.5" width="8" height="8" rx="1.6"/><path d="M10.5 3.5v-.3c0-.7-.5-1.2-1.2-1.2H3.7c-.7 0-1.2.5-1.2 1.2v5.6c0 .7.5 1.2 1.2 1.2h.3"/>',
@@ -1832,19 +1834,20 @@ PL.app = (() => {
     let timer = 0, f = 0;
     const wait = () => 1000 / Math.max(1, st.anim.fps || 12);
     const start = () => {
-      if (timer) return;
+      if (timer || playAll) return; // Play previews already plays every card
       el.classList.add('playing');
       const step = () => { f = (f + 1) % Math.max(1, st.anim.frames | 0); draw(f); timer = setTimeout(step, wait()); };
       timer = setTimeout(step, wait());
     };
     const stop = () => { clearTimeout(timer); timer = 0; el.classList.remove('playing'); if (f) { f = 0; draw(0); } };
     // Not on touch screens: there a tap would first count as hover, and some phones then skip the tap
-    // (the Home cards play there on their own, see autoPlayCards).
+    // (the Home cards play there on their own, see moveCards).
     if (!NO_HOVER) {
+      const leave = () => { if (!playAll) stop(); };
       el.addEventListener('mouseenter', start);
-      el.addEventListener('mouseleave', stop);
+      el.addEventListener('mouseleave', leave);
       el.addEventListener('focus', start);
-      el.addEventListener('blur', stop);
+      el.addEventListener('blur', leave);
     }
     return { start, stop, get playing() { return !!timer; } };
   }
@@ -1966,31 +1969,99 @@ PL.app = (() => {
   /* ------------------------------------------------------------ home page */
   let cardAnims = [];
   function stopCardAnimations() {
-    if (cardObs) { cardObs.disconnect(); cardObs = null; }
     cardAnims.forEach((a) => a.stop());
     cardAnims = [];
+    stopMovingCards();
+    homeCards = [];
   }
 
-  // Phones and tablets can't hover, so there the card most in view plays its loop on its own (one at a
-  // time, while at least half of it is on screen): every style's preview moves there too, at its
-  // default settings (Strand at Intensity 2.00, say), as it does under the pointer on a computer.
-  const NO_HOVER = !!(window.matchMedia && window.matchMedia('(hover: none)').matches);
-  let cardObs = null;
-  function autoPlayCards(pairs) {
-    if (!NO_HOVER || typeof IntersectionObserver === 'undefined' || page !== 'home') return;
-    const seen = new Map();
-    let current = null;
-    cardObs = new IntersectionObserver((entries) => {
-      for (const e of entries) seen.set(e.target, e.isIntersecting ? e.intersectionRatio : 0);
-      let best = null, top = 0.5;
-      for (const [el, anim] of pairs) { const r = seen.get(el) || 0; if (r > top + 1e-6 || (!best && r >= top)) { top = r; best = anim; } }
-      if (best === current) return;
-      if (current) current.stop();
-      current = best;
-      if (current) current.start();
-    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
-    for (const [el] of pairs) cardObs.observe(el);
+  // Play previews (the button by the order menu, on computers): every card in view plays its loop at once. It
+  // is off when the site opens: the cards stand still and play when you point at one. Phones and tablets have
+  // no button: there the cards on screen always play on their own. The choice holds while you move between
+  // Home and the styles (nothing is stored).
+  let playAll = false, moving = null, homeCards = [];
+  const PLAY_BUDGET_MS = 8;
+  // One timer draws the cards in view (cards scrolled away rest): each screen refresh it draws the ones due a
+  // new frame, taking turns, for at most a few milliseconds, so scrolling stays smooth (a heavy style skips
+  // frames instead). Each card's frame comes from the time and its own fps.
+  function moveCards(items) {
+    stopMovingCards();
+    const inView = new Set();
+    let obs = null;
+    if (typeof IntersectionObserver === 'undefined') items.forEach((x) => inView.add(x));
+    else {
+      const byCard = new Map(items.map((x) => [x.card, x]));
+      obs = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          const x = byCard.get(e.target);
+          if (x && e.isIntersecting) inView.add(x); else if (x) inView.delete(x);
+        }
+      }, { rootMargin: '25% 0px' });
+      items.forEach((x) => obs.observe(x.card));
+    }
+    items.forEach((x) => x.card.classList.add('playing'));
+    const t0 = performance.now();
+    let turn = 0, raf = 0;
+    const tick = (now) => {
+      const due = [...inView].filter((x) => !x.card.hidden);
+      const until = performance.now() + PLAY_BUDGET_MS;
+      for (let k = 0; k < due.length; k++) {
+        if (k && performance.now() > until) break;
+        const x = due[(turn + k) % due.length];
+        const f = Math.floor((Math.max(0, now - t0) / 1000) * Math.max(1, x.st.anim.fps || 12)) % Math.max(1, x.st.anim.frames | 0);
+        if (f !== x.frame) { x.draw(f); x.frame = f; }
+      }
+      turn = due.length ? (turn + 1) % due.length : 0;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    moving = {
+      stop() {
+        cancelAnimationFrame(raf);
+        if (obs) obs.disconnect();
+        items.forEach((x) => { x.card.classList.remove('playing'); if (x.frame) { x.frame = 0; x.draw(0); } });
+      },
+    };
   }
+  function stopMovingCards() { if (moving) { moving.stop(); moving = null; } }
+  // Every card in view playing (Play previews on, or a phone or tablet), or still cards that play when you
+  // point at one.
+  function applyPreviewMode() {
+    const all = playAll || NO_HOVER;
+    const home = $('#home');
+    if (home) home.classList.toggle('all-playing', all);
+    if (page !== 'home' || !homeCards.length) return;
+    homeCards.forEach((x) => x.anim.stop());
+    stopMovingCards();
+    if (all) moveCards(homeCards);
+  }
+  function previewsButton() {
+    const b = h('button', { class: 'home-btn', type: 'button', id: 'previewsBtn' });
+    const show = () => {
+      b.setAttribute('aria-pressed', String(playAll));
+      b.title = playAll ? 'Stop the previews: each card stands still until you point at it' : 'Play every preview at once';
+      b.replaceChildren(icon(playAll ? 'stop' : 'play'), h('span', null, playAll ? 'Stop previews' : 'Play previews'));
+    };
+    b.addEventListener('click', () => { playAll = !playAll; show(); applyPreviewMode(); });
+    show();
+    return b;
+  }
+
+  // The order of the cards: as the styles were added (oldest first, the numbers' order), newest first, or by
+  // name. Each card keeps its number. The choice holds while you move between Home and the styles.
+  const ORDERS = [['old', 'Oldest to newest'], ['new', 'Newest to oldest'], ['az', 'A to Z'], ['za', 'Z to A']];
+  const BY_ORDER = {
+    old: (a, b) => a.i - b.i,
+    new: (a, b) => b.i - a.i,
+    az: (a, b) => a.t.name.localeCompare(b.t.name, 'en'),
+    za: (a, b) => b.t.name.localeCompare(a.t.name, 'en'),
+  };
+  let homeOrder = 'old';
+
+  // Phones and tablets can't hover (or point precisely): there the cards on screen play on their own (moveCards),
+  // at their default settings (Strand at Intensity 2.00, say), as under the pointer on a computer, and the Play
+  // previews button is hidden (styles.css).
+  const NO_HOVER = !!(window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches);
 
   function renderHome() {
     stopCardAnimations();
@@ -2004,8 +2075,9 @@ PL.app = (() => {
           h('span', { class: 'tc-open' }, 'Open', icon('fwd'))
         )
       );
-      return { t, card, canvas };
+      return { t, i, card, canvas };
     });
+    const ordered = () => cards.slice().sort(BY_ORDER[homeOrder] || BY_ORDER.old);
     // Search: the cards whose name holds what's typed, updated with every letter typed or deleted.
     // Enter opens the first one left; Escape clears the field.
     const search = h('input', { class: 'txt', type: 'search', id: 'homeSearch', placeholder: 'Search pattern styles', 'aria-label': 'Search pattern styles by name', autocomplete: 'off', spellcheck: 'false', enterkeyhint: 'go' });
@@ -2023,19 +2095,30 @@ PL.app = (() => {
     };
     search.addEventListener('input', filter);
     search.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { const first = cards.find((c) => !c.card.hidden); if (first) { e.preventDefault(); go(first.t.id); } }
+      if (e.key === 'Enter') { const first = ordered().find((c) => !c.card.hidden); if (first) { e.preventDefault(); go(first.t.id); } }
       else if (e.key === 'Escape' && search.value) { e.stopPropagation(); search.value = ''; filter(); }
     });
+    const grid = h('div', { class: 'tool-grid' }, ordered().map((c) => c.card));
+    const order = h('select', { class: 'home-order', 'aria-label': 'Order of the styles', title: 'Order of the styles' },
+      ORDERS.map(([value, label]) => h('option', { value }, label)));
+    order.value = homeOrder;
+    order.addEventListener('change', () => { homeOrder = order.value; grid.replaceChildren(...ordered().map((c) => c.card)); });
     $('#home').replaceChildren(
       h('header', { class: 'home-head' },
         h('div', { class: 'home-intro' },
           h('h1', null, 'Pattern Studio'),
-          h('p', null, 'Generative pattern tool with over 20 different fully customizable designs to choose from. Create backgrounds for social media posts, websites, presentations or anything else you like, then export them as images, SVGs or seamless video loops. Pick a style to start. Works offline in your browser.'),
-          h('div', { class: 'home-tools' }, h('label', { class: 'home-search' }, icon('search'), search), themeButton())
+          h('p', null, 'Generative pattern tool with over 20 different fully customizable designs to choose from. Create backgrounds for social media posts, websites, presentations or anything else you like, then export them as images, SVGs or seamless video loops. Pick a style to start. Works offline in your browser.')
         ),
-        h('div', { class: 'home-meta' }, h('i'), `${TOOLS.length} ${TOOLS.length === 1 ? 'style' : 'styles'} · available`)
+        // one row: the search and the dark / light switch; the style count, Play previews and the order menu
+        h('div', { class: 'home-bar' },
+          h('div', { class: 'home-tools' }, h('label', { class: 'home-search' }, icon('search'), search), themeButton()),
+          h('div', { class: 'home-side' },
+            h('div', { class: 'home-meta' }, h('i'), `${TOOLS.length} ${TOOLS.length === 1 ? 'style' : 'styles'} · available`),
+            h('div', { class: 'home-view' }, previewsButton(), h('label', { class: 'home-sort' }, icon('sort'), order))
+          )
+        )
       ),
-      h('div', { class: 'tool-grid' }, cards.map((c) => c.card)),
+      grid,
       none,
       h('nav', { class: 'home-foot', 'aria-label': 'Links' }, footLink('GitHub', LINKS.github), h('span', { class: 'dot', 'aria-hidden': 'true' }), footLink('Contact', LINKS.contact))
     );
@@ -2043,7 +2126,7 @@ PL.app = (() => {
     // Draw after layout so each preview matches its card size; hover plays the loop.
     // Cards always show each style's default look, whatever has been edited since.
     requestAnimationFrame(() => {
-      const pairs = [];
+      homeCards = [];
       for (const c of cards) {
         const st = defaultState(c.t, firstSeed(c.t.id));
         const draw = (frame) => {
@@ -2057,9 +2140,9 @@ PL.app = (() => {
         draw(0);
         const anim = hoverLoop(c.card, draw, st);
         cardAnims.push(anim);
-        pairs.push([c.card, anim]);
+        homeCards.push({ card: c.card, draw, st, anim, frame: 0 });
       }
-      autoPlayCards(pairs);
+      applyPreviewMode(); // Play previews, or still cards that play when you point at one
     });
   }
 
