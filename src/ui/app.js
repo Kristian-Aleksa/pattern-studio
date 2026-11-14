@@ -576,11 +576,25 @@ PL.app = (() => {
     if (!raf) raf = requestAnimationFrame(tick);
   }
 
-  new ResizeObserver(() => { layoutView(); requestRender(); }).observe(stageEl);
+  // A ResizeObserver only schedules its work for the next frame. Changing the layout inside the callback itself
+  // (the artboard's size, --fit-h, the Kept strip's padding) can resize something being watched while the
+  // browser is still delivering notifications, which it reports as "ResizeObserver loop completed with
+  // undelivered notifications" (seen when the app runs in a preview pane that resizes it). One run per frame,
+  // however many notifications.
+  function onceNextFrame(fn) {
+    let queued = false;
+    return () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; fn(); });
+    };
+  }
+
+  new ResizeObserver(onceNextFrame(() => { layoutView(); requestRender(); })).observe(stageEl);
   // Narrow screens (the settings below the artboard): the artboard stays pinned under the strip on
   // top while the settings scroll beneath it (styles.css), its height hugging the frame's shape.
   if (narrowMQ.addEventListener) narrowMQ.addEventListener('change', () => { layoutView(); requestRender(); });
-  if (stripEl) new ResizeObserver(() => fitStage()).observe(stripEl);
+  if (stripEl) new ResizeObserver(onceNextFrame(fitStage)).observe(stripEl);
 
   function setPlaying(on) {
     playing = on;
@@ -1252,6 +1266,8 @@ PL.app = (() => {
   function updateLibraryBadge() {
     const b = $('#libBadge');
     if (b) b.style.display = libraryDirty ? 'inline-block' : 'none';
+    const lib = $('.sec[data-sec="library"]');
+    if (lib) lib.classList.toggle('unsaved', libraryDirty);
   }
 
   /* ------------------------------------------------------------ controls UI */
@@ -1307,7 +1323,15 @@ PL.app = (() => {
       const v = parseFloat(val.value);
       apply(isNaN(v) ? get() : v, true);
     });
-    val.addEventListener('keydown', (e) => { if (e.key === 'Enter') val.blur(); });
+    val.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') return val.blur();
+      const d = arrowStep(e);
+      if (!d) return;
+      e.preventDefault();
+      const typed = parseFloat(val.value);
+      apply((isNaN(typed) ? get() : typed) + d * step, true);
+      val.select();
+    });
     if (def !== undefined) lab.addEventListener('dblclick', () => apply(def, true));
     bindings.push({ sync: () => show(get()) });
     show(get());
@@ -1378,18 +1402,53 @@ PL.app = (() => {
     return h('div', { class: 'row wide', title: hint || '' }, h('label', null, label), sel);
   }
 
+  // Every section has a default: open, or closed (`open` false: General, Color palette, Effects, Animate,
+  // Shortcuts and Library), and on a phone every one is open. A style page always opens with its sections on
+  // their defaults (resetSections); the ones you open or close stay that way until you open a style page again.
+  const sectionDefault = (sec) => narrowMQ.matches || sec.dataset.open === 'true';
+  function showSection(sec, open) {
+    sec.classList.toggle('closed', !open);
+    sec.querySelector('.sec-head').setAttribute('aria-expanded', String(open));
+  }
   function section(key, title, nodes, open = true) {
-    const isOpen = collapsed[key] === undefined ? open : !collapsed[key];
-    const sec = h('section', { class: 'sec' + (isOpen ? '' : ' closed'), 'data-sec': key });
-    const head = h('button', { class: 'sec-head', type: 'button', 'aria-expanded': String(isOpen) }, h('span', null, title), icon('chev'));
+    const sec = h('section', { class: 'sec', 'data-sec': key, 'data-open': String(open) });
+    const head = h('button', { class: 'sec-head', type: 'button' }, h('span', null, title), icon('chev'));
     head.addEventListener('click', () => {
       const closed = sec.classList.toggle('closed');
       collapsed[key] = closed;
       head.setAttribute('aria-expanded', String(!closed));
     });
     sec.append(head, h('div', { class: 'sec-body' }, nodes));
+    showSection(sec, collapsed[key] === undefined ? sectionDefault(sec) : !collapsed[key]);
     return sec;
   }
+  // all: forget every open / close (a style page opening); otherwise only the untouched sections follow the
+  // window across the phone width
+  function resetSections(all) {
+    if (all) for (const k of Object.keys(collapsed)) delete collapsed[k];
+    document.querySelectorAll('.panel .sec').forEach((sec) => {
+      if (collapsed[sec.dataset.sec] === undefined) showSection(sec, sectionDefault(sec));
+    });
+  }
+  if (narrowMQ.addEventListener) narrowMQ.addEventListener('change', () => resetSections(false));
+
+  // A value box (the number by a slider, a custom frame size): ↑ ↓ step it (Shift: ten steps) and Tab / Shift+Tab
+  // go straight to the next / previous value box in the same panel, past the sliders, buttons and closed
+  // sections in between, its number selected so you can type over it. From the last (or first) one Tab carries
+  // on as usual.
+  const VALUE_BOX = 'input.val, .dims input';
+  const arrowStep = (e) => (e.altKey || e.ctrlKey || e.metaKey ? 0 : { ArrowUp: 1, ArrowDown: -1 }[e.key] || 0) * (e.shiftKey ? 10 : 1);
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || e.altKey || e.ctrlKey || e.metaKey || !(e.target instanceof HTMLInputElement) || !e.target.matches(VALUE_BOX)) return;
+    const panel = e.target.closest('.panel');
+    if (!panel) return;
+    const boxes = [...panel.querySelectorAll(VALUE_BOX)].filter((b) => !b.disabled && b.getClientRects().length);
+    const next = boxes[boxes.indexOf(e.target) + (e.shiftKey ? -1 : 1)];
+    if (!next) return;
+    e.preventDefault();
+    next.focus();
+    next.select();
+  });
 
   /* ---- color section ---- */
   let swatchWrap, paletteWrap;
@@ -1519,7 +1578,7 @@ PL.app = (() => {
 
     renderSwatches();
     renderPalettes();
-    return section('color', 'Color', [
+    return section('color', 'Color palette', [
       swatchWrap,
       ...tool.params.filter((d) => d.section === 'Color').map(paramRow),
       h('div', { class: 'btn-row' },
@@ -1531,7 +1590,7 @@ PL.app = (() => {
       h('p', { class: 'note' }, tool.inks.hint ? [h('b', null, tool.inks.hint), ' '] : null, `Click a card to edit it, × removes it, + adds one (${tool.inks.min}–${tool.inks.max} colors). Paste hex codes to use them as-is. Drag a card onto another to swap. Locked colors never change.`),
       h('div', { class: 'paste' }, name, h('button', { class: 'btn', type: 'button', onclick: savePal }, 'Save')),
       paletteWrap,
-    ]);
+    ], false);
   }
 
   /* ---- general: Rotation and Size, for every style ---- */
@@ -1540,7 +1599,7 @@ PL.app = (() => {
     return section('general', 'General', [
       rangeRow({ label: 'Rotation', aria: 'Pattern rotation', min: VIEW.rotate[0], max: VIEW.rotate[1], step: 1, unit: '°', def: dv.rotate, hint: 'Turns the whole pattern on the artboard (Dither and Grain stay as they are)', get: () => v().rotate, set: (x) => (v().rotate = x) }),
       rangeRow({ label: 'Size', aria: 'Pattern size', min: VIEW.size[0], max: VIEW.size[1], step: 1, unit: '%', def: dv.size, log: true, hint: 'Zooms the whole pattern in or out: zoomed out you see more of it (never a repeat), zoomed in it is drawn again in full detail', get: () => v().size, set: (x) => (v().size = x) }),
-    ]);
+    ], false);
   }
 
   /* ---- effects / animation / output / export / library ---- */
@@ -1580,7 +1639,7 @@ PL.app = (() => {
         rangeRow({ label: 'Vignette', aria: 'Grain vignette', min: 0, max: 100, step: 1, unit: '%', def: fxDef('vignette'), hint: 'Darkens the corners', get: () => fx().vignette, set: (v) => (fx().vignette = v), onInput: grain }),
         rangeRow({ label: 'Amount', aria: 'Grain amount', min: 0, max: 100, step: 1, unit: '%', def: fxDef('grain'), hint: 'How strong the grain is', get: () => fx().grain, set: (v) => (fx().grain = v), onInput: grain }),
       ]),
-    ]);
+    ], false);
   }
 
   let frameSlider = null;
@@ -1607,7 +1666,7 @@ PL.app = (() => {
       rangeRow({ label: 'Loop frames', min: 2, max: 240, step: 1, def: tool.defaults.anim.frames, hint: 'Frames in one seamless loop', get: () => a().frames, set: (v) => { a().frames = v; frameIdx = Math.min(frameIdx, v - 1); syncFrameSlider(); } }),
       row,
       h('p', { class: 'note' }, 'Loops are seamless: the last frame flows into the first. Speed is in frames per second.'),
-    ]);
+    ], false);
   }
 
   function outputSection() {
@@ -1632,6 +1691,17 @@ PL.app = (() => {
     };
     cw.addEventListener('change', onDims);
     ch.addEventListener('change', onDims);
+    for (const box of [cw, ch]) {
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') return box.blur();
+        const d = arrowStep(e);
+        if (!d) return;
+        e.preventDefault();
+        box.value = clamp((Math.round(+box.value) || 1080) + d, 16, 8192);
+        onDims();
+        box.select();
+      });
+    }
     const sizeRow = selectRow({
       label: 'Size', options: SIZES.map((s) => ({ value: String(s), label: `${s} px long edge` })),
       get: () => o().size, set: (v) => (o().size = +v), onChange: updateStatus,
@@ -1689,13 +1759,13 @@ PL.app = (() => {
       h('p', { class: 'note' }, 'Your palettes and kept variations live in this window. To keep them for next time, save a copy of the app with them built in, then replace your old file.'),
       h('button', { class: 'btn primary', type: 'button', onclick: saveAppCopy }, icon('file'), 'Save app copy', h('span', { id: 'libBadge', title: 'Unsaved changes', style: 'display:none;width:7px;height:7px;border-radius:50%;background:#111;margin-left:2px' })),
       file,
-    ]);
+    ], false);
   }
 
   // Every shortcut, listed in the output column under Export (the same list as the ? dialog).
   function shortcutsSection() {
     const list = SHORTCUTS.filter(([k]) => k !== '?'); // ? opens this list as a dialog
-    return section('keys', 'Shortcuts', [h('div', { class: 'keys' }, list.flatMap(([k, d]) => [h('kbd', null, k), h('span', null, d)]))]);
+    return section('keys', 'Shortcuts', [h('div', { class: 'keys' }, list.flatMap(([k, d]) => [h('kbd', null, k), h('span', null, d)]))], false);
   }
 
   // One control row for a tool parameter. `when(params)` (optional) shows the row only
@@ -1784,7 +1854,16 @@ PL.app = (() => {
       const v = Math.round(+seedIn.value);
       if (v >= 1) { S.seed = v; afterChange(); } else seedIn.value = S.seed;
     });
-    seedIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') seedIn.blur(); });
+    seedIn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') return seedIn.blur();
+      const d = arrowStep(e);
+      if (!d) return;
+      e.preventDefault();
+      const typed = Math.round(+seedIn.value);
+      S.seed = Math.max(1, (typed >= 1 ? typed : S.seed) + d);
+      afterChange();
+      seedIn.select();
+    });
     bindings.push({ sync: () => (seedIn.value = S.seed) });
     $('#actions').replaceChildren(
       h('button', { class: 'btn icon ghost', id: 'backBtn', type: 'button', title: 'Previous (←)', 'aria-label': 'Previous variation', onclick: () => stepHistory(-1) }, icon('back')),
@@ -1936,6 +2015,7 @@ PL.app = (() => {
       buildPanel();
       buildActions();
     }
+    if (entering) resetSections(true);
     // Coming back to a style (from Home, the style menu, the keys or Back / Forward) always shows its default
     // look, the one its card shows, frame and all; the look it had goes into its history (← brings it back).
     let reset = false;
@@ -2166,7 +2246,7 @@ PL.app = (() => {
     keptEl.style.paddingLeft = Math.max(0, Math.round(r.left - k.left)) + 'px';
     keptEl.style.paddingRight = Math.max(0, Math.round(k.right - r.right)) + 'px';
   }
-  new ResizeObserver(() => alignKept()).observe(document.querySelector('#home'));
+  new ResizeObserver(onceNextFrame(alignKept)).observe(document.querySelector('#home'));
 
   // Dark or light: the app always opens dark (nothing remembers it). Two switches, always in step: the
   // round one by the home search, and the one next to Home at the top of a style's settings (named there;
@@ -2224,7 +2304,7 @@ PL.app = (() => {
     modal.open([
       h('h2', null, 'Keyboard shortcuts'),
       h('div', { class: 'keys' }, keys.flatMap(([k, d]) => [h('kbd', null, k), h('span', null, d)])),
-      h('p', { class: 'note', style: 'margin-top:14px' }, 'Tips: double-click any slider label to reset it. Click a value to type an exact number. Everything runs offline — nothing is uploaded.'),
+      h('p', { class: 'note', style: 'margin-top:14px' }, 'Tips: double-click any slider label to reset it. Click a value to type an exact number, ↑ ↓ to nudge it (Shift for ten steps), Tab for the next one. Everything runs offline — nothing is uploaded.'),
       h('div', { class: 'foot' }, h('button', { class: 'btn', type: 'button', onclick: modal.close }, 'Close')),
     ]);
   }

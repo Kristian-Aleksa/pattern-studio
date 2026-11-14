@@ -23,12 +23,12 @@ Pick a style, then:
 
 - **New variation** (Space, or a click on the artboard) draws a new pattern; **N** keeps the settings with a
   new seed, **C** picks new colors and **R** rotates the colors through their roles. Locked colors stay put.
-- **Settings** sit in the left-hand column, under the style menu: the style's own settings, then **Color**
-  (presets, your own palettes, hex codes), **General** (Rotation and Size), **Effects** (Grain and Dither)
-  and **Animate**.
+- **Settings** sit in the left-hand column, under the style menu: the style's own settings, then **General**
+  (Rotation and Size), **Color palette** (presets, your own palettes, hex codes), **Effects** (Grain and
+  Dither) and **Animate**. Those four start closed: click a heading to open it.
 - **Output** sits in the right-hand column: a summary of the picture (ratio, size, inks, loop, render time),
   the **Frame** (ratio, size, Smooth or Pixel, transparent background), **Export**, every keyboard shortcut
-  and the **Library**.
+  and the **Library** (the shortcuts and the Library start closed).
 - **History:** ← and → step through every variation; **K** keeps one in the Kept strip; **D** goes back to the
   style's default look.
 - **Export:** PNG, SVG (true vector for vector styles), animated SVG and MP4 loops that join up seamlessly.
@@ -36,8 +36,10 @@ Pick a style, then:
   **Save app copy** downloads the app with your palettes and kept variations stored inside it.
 - **Dark / light mode:** the switch by the home search, or the one next to Home at the top of a style's
   settings.
+- **On a phone** it's one column: the artboard stays pinned at the top while you scroll through the style's
+  description, Output, Settings (every section open) and, at the bottom, the Kept strip.
 
-![A style open in Pattern Studio: its settings on the left, the artboard in the middle, and the output, export and shortcuts on the right](docs/screenshots/style.png)
+![A style open in Pattern Studio: its settings on the left, the artboard in the middle, and the output and export settings on the right](docs/screenshots/style.png)
 
 <p>
   <img src="docs/screenshots/light-mode.png" width="71%" alt="Pattern Studio in light mode">
@@ -61,6 +63,9 @@ Pick a style, then:
 | 1–9, 0 | Open a style (0 is the tenth) |
 | [ ] | Previous / next style |
 | ? | All shortcuts |
+
+In a value box (the number next to a slider, or a custom frame size), ↑ and ↓ change the number one step at a
+time (Shift: ten steps), and Tab / Shift+Tab jump to the next / previous value box in that column.
 
 ## The styles
 
@@ -110,7 +115,8 @@ src/
     tools.js        style registry
   tools/          one file per style (sonar.js, culture.js, … aura.js)
   ui/
-    styles.css      app styles (system fonts only)
+    fonts.css       the Aeonik interface font, embedded so the app looks the same offline
+    styles.css      app styles: dark and light themes, the phone layout
     app.js          the app: home page, style menu, routing, settings, colors,
                     output, history, kept strip, exports, library
 scripts/
@@ -126,4 +132,4 @@ The app is built from the files in `src/`. After changing them, run `python3 bui
 
 ## Credits
 
-The interface uses system fonts only. The Atlas style draws its letters with Atlas Mono, outlines derived from DejaVu Sans Mono (Bitstream Vera license; the license notice is at the top of `src/core/glyphs.js`).
+The interface is set in Aeonik by CoType Foundry, embedded in `src/ui/fonts.css`. The Atlas style draws its letters with Atlas Mono, outlines derived from DejaVu Sans Mono (Bitstream Vera license; the license notice is at the top of `src/core/glyphs.js`).
