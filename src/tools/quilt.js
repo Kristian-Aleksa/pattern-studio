@@ -455,7 +455,7 @@
   PL.tools.register({
     id: 'quilt',
     name: 'Quilt',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Pixel blanket',
     about: 'Woven pixel blankets, mirrored from the middle: crosses, stars and diamonds, plaid, gingham, basket weave, bands, tabs, steps, zigzags, waves, rings and a knitted dither. In the animation the weave flows toward the middle, the rings ripple out and the motifs swap colors, one cell at a time.',
     inks: {

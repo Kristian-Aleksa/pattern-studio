@@ -568,7 +568,7 @@
   PL.tools.register({
     id: 'strand',
     name: 'Strand',
-    kind: 'Backgrounds',
+    kind: 'Organic',
     tagline: 'Rod chains',
     about: 'Strands of rods that wander, fork and cross, printed slightly off register: a bright ink over a pale plate on a dark ground, speckled, streaked or screened toward its edges.',
     raster: true,

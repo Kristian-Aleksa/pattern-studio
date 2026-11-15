@@ -171,7 +171,7 @@
   /* ---- build ------------------------------------------------------------------------------- */
   // region (General's Rotation and Size): the part of the world to cover; the terrain and its grid run on
   // past the frame, so zooming out shows more of the same map.
-  function build({ W, H, aspect, seed, p, colors, t = 0, anim, region }) {
+  function build({ W, H, aspect, seed, p, colors, t = 0, anim, region, transparent = false }) {
     const asp = aspect > 0 ? aspect : W / H;
     const { cols, rows } = grid(p, asp);
     const R = region;
@@ -189,7 +189,7 @@
       for (let i = c0 + 1; i <= c1; i++) {
         const a = L[row + i0] % n;
         if (i < c1 && L[row + i] % n === a) continue;
-        PL.Scene.rect(inkL[a], X(i0), Y(j), X(i) - X(i0), Y(j + 1) - Y(j));
+        if (!(transparent && a === 0)) PL.Scene.rect(inkL[a], X(i0), Y(j), X(i) - X(i0), Y(j + 1) - Y(j)); // Transparent: Ink 1's cells left out
         i0 = i;
       }
     }
@@ -229,7 +229,7 @@
   PL.tools.register({
     id: 'atlas',
     name: 'Atlas',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Text-mode terrain',
     about: 'A map in a character grid: warped noise terrain cut into terraces, each cell in its terrace\'s ink, with characters that climb their set as the land rises.',
     inks: {
@@ -246,7 +246,6 @@
       fx: {},
     },
     recolorable: false, // the type's ink depends on the colours
-    opaque: true,
     build,
     zoom: true, // draws any region of its world (General's Rotation and Size)
     _K: K,

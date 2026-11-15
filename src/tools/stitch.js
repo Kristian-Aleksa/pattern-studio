@@ -248,7 +248,7 @@
   PL.tools.register({
     id: 'stitch',
     name: 'Stitch',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Glitched pixel grid',
     about: 'A grid of square cells colored from a noise field cut into levels: tall streaks, bands of rows slid sideways like a glitch, round blobs of one color and a scatter of stray cells, all ruled with thin dark lines. In the animation the field drifts round a small circle, so the cells step through the colors.',
     inks: {

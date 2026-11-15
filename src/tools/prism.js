@@ -398,7 +398,7 @@
   PL.tools.register({
     id: 'prism',
     name: 'Prism',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Pixel aurora',
     about: 'Chunky pixel streams fanning across a black dot-grid field: a white core with a rainbow fringe that breaks up into scattered pixels. In the animation every pixel shimmers across the band edges.',
     inks: {

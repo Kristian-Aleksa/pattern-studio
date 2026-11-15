@@ -292,7 +292,7 @@
   PL.tools.register({
     id: 'sonar',
     name: 'Sonar',
-    kind: 'Backgrounds',
+    kind: 'Halftone',
     tagline: 'Dithered landmasses',
     about: 'A coastline cut from a noise field, filled as a halftone grid and dissolving into two colors of speckle at its edge.',
     inks: {

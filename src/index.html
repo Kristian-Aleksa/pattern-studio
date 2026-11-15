@@ -9,8 +9,11 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Pattern Studio">
 <meta property="og:description" content="Fully customizable generative pattern tool. Works offline in your browser.">
-<!-- the browser tab's little ball: neon yellow on dark tabs, a deeper lime that stands out on light ones -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cstyle%3Ecircle%7Bfill:%238fac00%7D@media (prefers-color-scheme:dark)%7Bcircle%7Bfill:%23e4ff3d%7D%7D%3C/style%3E%3Ccircle cx='16' cy='16' r='13'/%3E%3C/svg%3E">
+<!-- the browser tab's little ball: #0080FB on light and dark tabs alike -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%230080fb'/%3E%3C/svg%3E">
+<!-- Dark or light to start: light from 8 am to 5 pm on this device's clock (its time zone), dark the rest of the day.
+     Set here, before the page draws, so it never flashes the other one. -->
+<script>(function () { var h = new Date().getHours(), r = document.documentElement; if (h >= 8 && h < 17) r.setAttribute('data-theme', 'light'); else r.removeAttribute('data-theme'); })();</script>
 <style>
 /*@inline ui/fonts.css*/
 /*@inline ui/styles.css*/
@@ -21,8 +24,9 @@
   <!-- Left: the style menu and the style's own settings. Middle: the artboard. Right: output, export, shortcuts and the library. -->
   <aside class="sidebar" aria-label="Pattern settings">
     <div class="side-top">
+      <!-- the name with "Generative Tool" beside it, as on the home page -->
       <a class="brand" id="brand" href="#/" title="Home: all pattern styles">
-        <div>Pattern Studio<small>GENERATIVE TOOLS</small></div>
+        <div>Pattern Studio <small>Generative Tool</small></div>
       </a>
       <nav class="side-nav" aria-label="Main">
         <a class="nav-item" id="homeNav" href="#/" title="Home: all pattern styles (H)">
@@ -31,8 +35,10 @@
         </a>
         <!-- Dark / light: filled in by app.js (the same switch as the one by the home search) -->
         <button class="nav-item" id="themeNav" type="button"></button>
+        <!-- Default: the style back to its original look (filled in by app.js; the D key does the same) -->
+        <button class="nav-item" id="defaultBtn" type="button" aria-label="Default" title="Default: back to this style's original look — colors, settings and seed (D)"></button>
       </nav>
-      <!-- the style switcher: previous, every style, next (filled in by app.js) -->
+      <!-- the style switcher: every style by name (filled in by app.js; [ and ] step through them) -->
       <div class="style-pick" id="stylePick"></div>
     </div>
     <div class="panel inputs" id="panel"></div>
@@ -58,8 +64,7 @@
   <aside class="outputs" aria-label="Output, export and shortcuts">
     <div class="panel" id="panelOut"></div>
     <div class="side-foot">
-      <div class="offline" title="Runs 100% offline. Nothing is uploaded or fetched."><i></i><span class="text">Offline · nothing uploaded</span></div>
-      <button class="btn ghost" id="helpBtn" title="Keyboard shortcuts (?)">?<span class="text">&nbsp;Shortcuts</span></button>
+      <div class="offline" title="Runs 100% offline. Nothing is uploaded or fetched."><i></i><span class="text">Available now</span></div>
     </div>
   </aside>
 </div>

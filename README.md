@@ -3,8 +3,8 @@
 A generative pattern tool with 23 fully customizable styles. Make backgrounds for social media posts,
 websites, presentations or anything else, then export them as images, SVGs or seamless video loops.
 
-Everything runs in the browser: no account, no server, and your patterns are never uploaded. The whole app
-is a single HTML file that also works offline. The website counts anonymous visits with Vercel Web Analytics
+Everything runs in the browser: no account, no server, and your patterns are never uploaded (what you keep
+and save stays in your browser, on your device). The whole app is a single HTML file that also works offline. The website counts anonymous visits with Vercel Web Analytics
 (no third-party cookies); the app file on your computer never sends anything.
 
 ![Pattern Studio's home page: a card with a live preview for each of the 23 styles](docs/screenshots/home.png)
@@ -15,27 +15,33 @@ is a single HTML file that also works offline. The website counts anonymous visi
 - **Offline:** open `public/index.html` in Chrome, Edge, Firefox or Safari (double-click it). It is the
   complete app in one file, so it can be renamed (for example `Pattern Studio.html`), copied and shared.
 
-On the home page, **Play previews** plays every card's loop at once; when it's off, a card plays when you
-point at it. On phones and tablets there's no button: the cards on screen play on their own. The order menu
-sorts the styles: oldest to newest, newest to oldest, A to Z or Z to A.
+On the home page, the category menu shows one kind of style at a time (Gradients, Halftone, Organic,
+Pixel & glyphs or Pop art) and the order menu sorts them: oldest to newest, newest to oldest, A to Z or Z to A.
+**Play previews** plays every card's loop at once; when it's off, a card plays when you point at it. On phones
+and tablets there's no button: the cards on screen play on their own.
 
 Pick a style, then:
 
 - **New variation** (Space, or a click on the artboard) draws a new pattern; **N** keeps the settings with a
   new seed, **C** picks new colors and **R** rotates the colors through their roles. Locked colors stay put.
-- **Settings** sit in the left-hand column, under the style menu: the style's own settings, then **General**
+- **Settings** sit in the left-hand column, under Home, Dark mode, **Default** and the style menu: the style's own settings, then **General**
   (Rotation and Size), **Color palette** (presets, your own palettes, hex codes), **Effects** (Grain and
   Dither) and **Animate**. Those four start closed: click a heading to open it.
 - **Output** sits in the right-hand column: a summary of the picture (ratio, size, inks, loop, render time),
-  the **Frame** (ratio, size, Smooth or Pixel, transparent background), **Export**, every keyboard shortcut
-  and the **Library** (the shortcuts and the Library start closed).
-- **History:** ← and → step through every variation; **K** keeps one in the Kept strip; **D** goes back to the
-  style's default look.
+  the **Frame** (ratio and size; a Smooth or Pixel render; and Transparent, which leaves out the palette's first
+  color, off to start with), **Export**, every keyboard shortcut and the **Library** (the shortcuts and the
+  Library start closed). Every style has the same Frame settings.
+- **History:** ← and → step through every variation; **K** keeps one in the Kept strip; **Default** (or **D**)
+  goes back to the style's default look.
 - **Export:** PNG, SVG (true vector for vector styles), animated SVG and MP4 loops that join up seamlessly.
+- **Saved as you go:** your kept variations, saved palettes and each style's last settings stay in your
+  browser, so they're there the next time you open the app on the same device (not on your other devices).
 - **Library:** save a pattern as a small `.pattern.json` file and open it again later, on any computer.
-  **Save app copy** downloads the app with your palettes and kept variations stored inside it.
-- **Dark / light mode:** the switch by the home search, or the one next to Home at the top of a style's
-  settings.
+  **Save app copy** downloads the app with your palettes, kept variations and settings stored inside it, to
+  take them to another computer.
+- **Dark / light mode:** it opens light from 8 am to 5 pm on your device's clock and dark the rest of the day.
+  The switch by the home search, or Dark mode / Light mode at the top of a style's settings, changes it for
+  that visit.
 - **On a phone** it's one column: the artboard stays pinned at the top while you scroll through the style's
   description, Output, Settings (every section open) and, at the bottom, the Kept strip.
 
@@ -69,31 +75,31 @@ time (Shift: ten steps), and Tab / Shift+Tab jump to the next / previous value b
 
 ## The styles
 
-| Style | What it draws | Drawn as |
-| --- | --- | --- |
-| Sonar | Dithered landmasses | vector shapes |
-| Culture | Grainy colony fields | pixels |
-| Cipher | Glyph rivers | vector shapes |
-| Dahlia | Burst posters | vector shapes |
-| Coral | Sea-fan textile | vector shapes |
-| Whorl | Warped op-art | vector shapes |
-| Splice | Cut-up riso | pixels |
-| Filament | Thread field | vector shapes |
-| Stipple | Halftone dots | vector shapes |
-| Rise | Stripe arcs | vector shapes |
-| Prism | Pixel aurora | vector shapes |
-| Motley | Glyph patchwork | vector shapes |
-| Warp | Op-art pattern | vector shapes |
-| Stitch | Glitched pixel grid | vector shapes |
-| Quilt | Pixel blanket | vector shapes |
-| Modular | Modular grid | vector shapes |
-| Husk | Husk scatter | pixels |
-| Mist | Neon wash | pixels |
-| Atlas | Text-mode terrain | vector shapes |
-| Strand | Rod chains | pixels |
-| Sear | Thermal smear | pixels |
-| Crowd | Blurred crowd | pixels |
-| Aura | Soft gradient | pixels |
+| Style | What it draws | Category | Drawn as |
+| --- | --- | --- | --- |
+| Sonar | Dithered landmasses | Halftone | vector shapes |
+| Culture | Grainy colony fields | Organic | pixels |
+| Cipher | Glyph rivers | Pixel & glyphs | vector shapes |
+| Dahlia | Burst posters | Pop art | vector shapes |
+| Coral | Sea-fan textile | Pop art | vector shapes |
+| Whorl | Warped op-art | Pop art | vector shapes |
+| Splice | Cut-up riso | Halftone | pixels |
+| Filament | Thread field | Pixel & glyphs | vector shapes |
+| Stipple | Halftone dots | Halftone | vector shapes |
+| Rise | Stripe arcs | Pop art | vector shapes |
+| Prism | Pixel aurora | Pixel & glyphs | vector shapes |
+| Motley | Glyph patchwork | Pixel & glyphs | vector shapes |
+| Warp | Op-art pattern | Pop art | vector shapes |
+| Stitch | Glitched pixel grid | Pixel & glyphs | vector shapes |
+| Quilt | Pixel blanket | Pixel & glyphs | vector shapes |
+| Modular | Modular grid | Pixel & glyphs | vector shapes |
+| Husk | Husk scatter | Organic | pixels |
+| Mist | Neon wash | Gradients | pixels |
+| Atlas | Text-mode terrain | Pixel & glyphs | vector shapes |
+| Strand | Rod chains | Organic | pixels |
+| Sear | Thermal smear | Gradients | pixels |
+| Crowd | Blurred crowd | Organic | pixels |
+| Aura | Soft gradient | Gradients | pixels |
 
 Vector styles export clean SVG shapes; pixel styles are painted pixel by pixel (their SVG holds the image).
 
@@ -113,7 +119,7 @@ src/
     glyphs.js       Atlas Mono outlines (generated by scripts/make_glyphs.py)
     fx.js           Effects shared by every style: Grain and Dither
     tools.js        style registry
-  tools/          one file per style (sonar.js, culture.js, … aura.js)
+  tools/          one file per style (sonar.js, culture.js, … aura.js); its kind is its category
   ui/
     fonts.css       the Aeonik interface font, embedded so the app looks the same offline
     styles.css      app styles: dark and light themes, the phone layout

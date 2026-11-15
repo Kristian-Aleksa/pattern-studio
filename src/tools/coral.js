@@ -729,7 +729,7 @@
   PL.tools.register({
     id: 'coral',
     name: 'Coral',
-    kind: 'Backgrounds',
+    kind: 'Pop art',
     tagline: 'Sea-fan textile',
     about: 'Ribbed coral branches fan out and split across a dark ground, passing under and over torn paper with a dot screen, with drop shadows and print grain.',
     inks: {

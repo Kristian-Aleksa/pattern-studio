@@ -394,7 +394,7 @@
   PL.tools.register({
     id: 'motley',
     name: 'Motley',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Glyph patchwork',
     about: 'Ragged blobs and stepped blocks laid over one another on a grid, each filled with squares, circles, targets, pluses, stripes or dots in one ink; some woven into the shape below, some outlined in stitches, some cut back to the ground. In the animation the woven glyphs twinkle as they drop out for a moment.',
     inks: {

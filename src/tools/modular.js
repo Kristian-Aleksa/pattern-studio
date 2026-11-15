@@ -342,7 +342,7 @@
   PL.tools.register({
     id: 'modular',
     name: 'Modular',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Modular grid',
     about: 'A modular grid: modules joined into bigger pieces, each one empty, solid, a pixel field, a dot matrix, a line grid or a gradient, over fine rules. In the animation the pixel fields and the dots flicker as their field drifts, in four soft beats per loop.',
     inks: {

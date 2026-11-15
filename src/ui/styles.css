@@ -177,9 +177,9 @@ kbd {
 }
 a.brand { color: inherit; text-decoration: none; border-radius: var(--r); }
 a.brand:hover small { color: var(--muted); }
-/* "GENERATIVE TOOLS" reads "Generative tools", like the "Drafts" line under a Figma file name */
-.brand small { display: block; font: 400 var(--fs-xs)/1.3 var(--sans); color: var(--faint); margin-top: 2px; text-transform: lowercase; }
-.brand small::first-letter { text-transform: uppercase; }
+/* "Generative Tool" beside the name, as on the home page: smaller, in half the name's color (on the narrowest phones
+   it goes under the name; see the 480px query) */
+.brand small { font-size: var(--fs-2xs); font-weight: inherit; opacity: 0.5; }
 .side-nav { display: flex; gap: 2px; padding: 0 var(--sp-2) var(--sp-2); } /* Home, then the dark / light switch */
 .nav-item {
   display: flex;
@@ -200,7 +200,7 @@ a.brand:hover small { color: var(--muted); }
 .nav-item:hover { background: var(--raise); color: var(--text); }
 .nav-item[aria-current="true"] { background: var(--selected-bg); color: var(--text); }
 button.nav-item { background: none; text-align: left; }
-.style-pick { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-1); align-items: center; padding: 0 var(--sp-2); }
+.style-pick { padding: 0 var(--sp-2); }
 .style-pick select.sel { width: 100%; font-weight: 600; }
 .sidebar .panel { flex: 1; border-left: 0; background: none; }
 
@@ -239,8 +239,7 @@ button.nav-item { background: none; text-align: left; }
 }
 .title { min-width: 0; flex: 1; }
 .title h1 { margin: 0; font-size: var(--fs-xl); font-weight: 600; letter-spacing: -0.005em; display: flex; align-items: baseline; gap: var(--sp-2); white-space: nowrap; overflow: hidden; }
-.title h1 small { font: 500 var(--fs-xs) var(--sans); color: var(--accent-text); background: var(--selected-bg); border-radius: var(--r-xs); padding: 1px 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; text-transform: lowercase; }
-.title h1 small::first-letter { text-transform: uppercase; } /* app.js writes the kind in capitals: it reads "Backgrounds", like the home cards */
+.title h1 small { font: 500 var(--fs-xs) var(--sans); color: var(--accent-text); background: var(--selected-bg); border-radius: var(--r-xs); padding: 1px 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; } /* the style's category, as on its home card */
 .title p { margin: 2px 0 0; color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .actions {
   display: flex;
@@ -453,7 +452,7 @@ button.nav-item { background: none; text-align: left; }
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
 }
-/* "Settings" and "Output" read like Figma's selected Design tab */
+/* "Output" reads like Figma's selected Design tab */
 .panel-head b { font: 600 var(--fs-sm)/16px var(--sans); color: var(--text); background: var(--raise); border-radius: var(--r); padding: 4px 8px; }
 .note.about { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--line); margin: 0; }
 .note.about b { color: var(--text); font-weight: 600; }
@@ -799,17 +798,35 @@ select.sel:focus, input.txt:focus { border-color: var(--accent); outline: none; 
 /* The top section: a large title and subheading over the search row (positioned, so a background animation
    can fill it later). */
 .home-head { position: relative; margin: 0 auto var(--sp-8); max-width: 1180px; padding-top: var(--sp-8); }
-.home-head h1 { font-size: var(--fs-display); line-height: 1.1; letter-spacing: 0; margin: 0 0 var(--sp-3); font-weight: 500; } /* Aeonik's own spacing: tighter makes the tt in Pattern touch */
+/* The title row: Pattern Studio with "Generative Tool" beside it (half its size, half its color), and GitHub and
+   Contact at the right end; on a phone they go above it (see the 600px query) */
+.home-title { --title-fs: var(--fs-display); --link-fs: var(--fs-md); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-4); margin: 0 0 var(--sp-5); }
+.home-head h1 { font-size: var(--title-fs); line-height: 1.1; letter-spacing: 0; margin: 0; font-weight: 500; min-width: 0; } /* Aeonik's own spacing: tighter makes the tt in Pattern touch */
+.home-head h1 span { font-size: 0.5em; opacity: 0.5; white-space: nowrap; }
+/* GitHub and Contact sit on the title's visual middle. Boxes centred on each other aren't enough: Aeonik's letters sit
+   low in their box, and lower the bigger the type (with the lowercase carrying the weight, about 0.09em for the title
+   and 0.084em for the links, measured from the drawn letters), so the links come down by the difference. */
+.home-links { display: flex; gap: var(--sp-1); margin-left: auto; margin-right: calc(-1 * var(--sp-3)); transform: translateY(calc(var(--title-fs) * 0.09 - var(--link-fs) * 0.084)); } /* the words line up with the right edge */
+.home-link { height: 32px; padding: 0 var(--sp-3); border-radius: var(--r-md); border: 0; background: none; color: var(--text); display: inline-flex; align-items: center; font-size: var(--link-fs); font-weight: 500; text-decoration: none; white-space: nowrap; transition: background 0.12s; }
+.home-link:hover { background: var(--raise); }
+.home-link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .home-head p { color: var(--muted); max-width: 680px; margin: 0; font-size: var(--fs-subhead); line-height: 1.5; text-wrap: pretty; } /* no single word left on the last line */
 .home-intro { min-width: 0; }
-/* One row under the intro, like the filter row on Figma's Community page: the search and the dark / light switch on
-   the left; the style count, Play previews and the order of the cards on the right. The search narrows to keep them
-   on one row; when there's still no room (a phone), the count and the order menu move to the row below. */
-.home-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-4); margin-top: var(--sp-8); }
-.home-side { display: flex; align-items: center; gap: var(--sp-2); margin-left: auto; }
-.home-side .home-meta { margin-right: var(--sp-2); }
-.home-view { display: flex; align-items: center; gap: var(--sp-2); }
-/* Play previews and the order menu: outlined chips with an icon, like Figma's "Design resources" filters */
+/* Under the intro: the style count at the left; under it one row, like the filter row on Figma's Community page: the
+   search and the dark / light switch on the left; the category and order menus and Play previews on the right. The
+   search narrows to keep them on its row; when they still don't fit beside it, the three get a row of their own under
+   it, sharing its width (the homebar query below). */
+.home-bar { container: homebar / inline-size; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-4); margin-top: var(--sp-6); }
+.home-status { flex: 1 1 100%; display: flex; align-items: center; }
+.home-view { display: flex; align-items: center; gap: var(--sp-2); margin-left: auto; }
+/* 726px: the search at its narrowest (260px), the gap (16px) and the three (450px with "Stop previews") */
+@container homebar (max-width: 726px) {
+  .home-view { flex: 1 1 100%; flex-wrap: wrap; margin-left: 0; min-width: 0; }
+  .home-view .home-sort { flex: 1 1 150px; min-width: 0; }
+  .home-view select.home-order { width: 100%; }
+  .home-view .home-btn { margin-left: auto; } /* on a line of its own (a very narrow window), still at the right */
+}
+/* Play previews and the two menus: outlined chips with an icon, like Figma's "Design resources" filters */
 .home-btn { flex: none; height: 32px; padding: 0 var(--sp-3) 0 10px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel); color: var(--text); display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: var(--fs-md); font-weight: 500; white-space: nowrap; transition: background 0.12s, border-color 0.12s, color 0.12s; }
 .home-btn:hover { background: var(--raise); }
 .home-btn svg { width: 14px; height: 14px; color: var(--muted); }
@@ -845,22 +862,10 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
 .home-search input.txt { height: 32px; padding: 0 var(--sp-3) 0 32px; font-size: var(--fs-md); }
 .home-search input.txt::placeholder { color: var(--faint); }
 .home-empty { max-width: 1180px; margin: var(--sp-2) auto 0; color: var(--muted); font-size: var(--fs-md); }
-/* Under the last row of cards: GitHub • Contact, centred */
-/* GitHub • Contact: the dot on the page's centre line with a word either side, and level with the words
-   (its middle half a capital's height above their baseline, 0.36em in any of the fonts in --sans) */
-.home-foot { display: grid; grid-template-columns: 1fr auto 1fr; align-items: baseline; column-gap: 12px; max-width: 1180px; margin: 40px auto 4px; font-size: var(--fs-md); line-height: 1; }
-.home-foot a { color: var(--muted); text-decoration: none; padding: 6px 2px; border-radius: var(--r-xs); }
-.home-foot a:first-child { justify-self: end; }
-.home-foot a:last-child { justify-self: start; }
-.home-foot a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
-.home-foot .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--faint); position: relative; top: calc(2px - 0.36 * var(--fs-md)); }
-@supports (text-box: trim-both cap alphabetic) { /* exact: the words' boxes trimmed to their capitals, all three centred */
-  .home-foot { align-items: center; }
-  .home-foot a { text-box: trim-both cap alphabetic; padding: 8px 2px; }
-  .home-foot .dot { top: 0; }
-}
 .home-meta { font: var(--fs-xs) var(--sans); color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: var(--sp-2); }
-.home-meta i { width: 6px; height: 6px; border-radius: 50%; background: #14ae5c; box-shadow: 0 0 0 3px rgba(20, 174, 92, 0.18); }
+.home-meta i { width: 6px; height: 6px; margin-left: 3px; border-radius: 50%; background: #14ae5c; box-shadow: 0 0 0 3px rgba(20, 174, 92, 0.18); } /* its soft 3px ring lines up with the page's left edge */
+/* Under the last row of cards, where GitHub and Contact used to be */
+.home-note { max-width: 1180px; margin: 40px auto 4px; text-align: center; color: var(--muted); font-size: var(--fs-md); line-height: 1.5; }
 /* file cards: the preview on top over a divider, the name and details below */
 .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--sp-4); max-width: 1180px; margin: 0 auto; }
 .tool-card {
@@ -920,18 +925,18 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
   body { overflow: auto; }
   /* One column, the whole page scrolls: the strip (brand, Home, the dark / light switch, the style menu), the title and
      actions, the artboard and its status, the style's name and description, the output (frame, export, library), the
-     settings, and the kept strip at the bottom. The artboard stays pinned under the strip while everything below it
+     settings, and the kept strip at the bottom. (In the strip, Default is the icon after Home and dark / light.) The artboard stays pinned under the strip while everything below it
      scrolls underneath, so every change to a setting shows as it happens.
      (main's and both settings boxes' children join the page's grid, ordered here.) */
   .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; height: auto; }
   .main, .sidebar { display: contents; }
-  .side-top { order: 0; position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 6px 10px; overflow-x: auto; }
+  .side-top { order: 0; position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 6px 10px; overflow-x: auto; border-bottom: 1px solid var(--line); }
   .brand { flex: none; padding: 4px 6px; font-size: var(--fs-lg); }
   .brand small { font-size: var(--fs-2xs); }  /* the phone strip stays compact */
   .side-top .side-nav { flex: none; padding: 0; }
   .side-top .nav-item { flex: none; justify-content: center; padding: 10px 8px; }
   .nav-item .text { display: none; }
-  .style-pick { flex: 1; min-width: 170px; padding: 0; }
+  .style-pick { flex: 1; min-width: 110px; padding: 0; }
   .topbar { order: 1; flex-wrap: wrap; }
   .title { flex-basis: 100%; }  /* the title on its own line, the toolbar under it */
   /* --strip-h: the strip's height; --fit-h: the height that fits the frame's shape at this width (app.js) */
@@ -950,7 +955,6 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
   #panel > * { background: var(--panel); }
   #panel > .note.about { order: 5; border-top: 1px solid var(--line); }
   .outputs { order: 6; border-left: 0; }
-  #panel > .panel-head { order: 7; }
   #panel > .sec { order: 8; }
   .kept { order: 9; }
   .app:not(.is-home) .kept { border-top: 0; } /* the last setting's line is right above it */
@@ -966,28 +970,35 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
 @media (hover: none), (pointer: coarse) {
   #previewsBtn { display: none; }
 }
-/* Phones: the search across the page; under it the style count (left) and the order menu (right) */
+/* Phones: the title, Generative Tool, GitHub and Contact on one row; then the style count, the search across the page,
+   and the category and order menus side by side, sharing the width (Play previews too, where it shows) */
 @media (max-width: 600px) {
   :root { --fs-display: 32px; --fs-subhead: 15px; }  /* phones: smaller still */
   .home-head { padding-top: var(--sp-2); }
-  .home-bar { margin-top: var(--sp-6); }
-  .home-tools { flex: 1 1 100%; max-width: none; }
-  .home-side { flex: 1 1 100%; margin-left: 0; justify-content: space-between; flex-wrap: wrap; row-gap: 10px; }
-  .home-side .home-meta { margin-right: 0; }
-  .home-view { min-width: 0; }
-  .home-sort { flex: 0 1 auto; min-width: 0; }
-  select.home-order { max-width: 100%; }
+  /* The title shrinks as much as it needs to keep the row on one line (all 32px from about 450px wide up): 100cqi is
+     the row's width, 118px what GitHub and Contact take with the gap (and a little spare), 10.5 the title's width per
+     px of size. Below about 330px wide, Generative Tool goes under the title instead. */
+  .home-title { --title-fs: clamp(16px, calc((100cqi - 118px) / 10.5), var(--fs-display)); --link-fs: var(--fs-sm); flex-wrap: nowrap; gap: var(--sp-3); margin-bottom: var(--sp-4); container-type: inline-size; }
+  .home-head h1 { flex: 1 1 auto; }
+  .home-head h1 span { font-size: max(0.5em, 10px); }
+  .home-links { flex: none; gap: 0; margin-right: -6px; }
+  .home-link { padding: 0 6px; }
+  .home-bar { margin-top: var(--sp-5); gap: 10px var(--sp-4); }
+  .home-tools { flex: 1 1 100%; max-width: none; } /* the search across the page */
+}
+@media (max-width: 480px) {
+  .brand small { display: block; margin-top: 1px; } /* Generative Tool under the name: the strip has no room beside it */
 }
 @media (max-width: 380px) and (hover: none), (max-width: 380px) and (pointer: coarse) {
-  .home-side { gap: 6px; }
+  .home-view { gap: 6px; }
   .home-meta { font-size: var(--fs-2xs); gap: 6px; }
   .home-sort > span { left: 9px; }
   select.home-order { padding-left: 28px; font-size: var(--fs-sm); }
 }
 @media (max-width: 350px) and (hover: none), (max-width: 350px) and (pointer: coarse) {
-  /* the smallest phones: no room for both on one row, so the order menu goes under the count */
-  .home-side { flex-wrap: wrap; }
-  .home-view, .home-sort, select.home-order { width: 100%; }
+  /* the smallest phones: no room for both menus on one row, so they stack */
+  .home-view { flex-wrap: wrap; }
+  .home-view .home-sort { flex: 1 1 100%; }
 }
 @media (hover: none) {
   .gens button { width: 24px; height: 28px; }

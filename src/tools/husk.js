@@ -469,7 +469,7 @@
   PL.tools.register({
     id: 'husk',
     name: 'Husk',
-    kind: 'Backgrounds',
+    kind: 'Organic',
     tagline: 'Husk scatter',
     about: 'Lumpy husks scattered over a ground, each a dark skin over a kernel that shows through as a dot screen or in crumbs, deepest in the middle, with fine grain over everything. In the animation every husk circles its own path through the fixed screen, so the dots swell and the crumbs open and close.',
     raster: true,

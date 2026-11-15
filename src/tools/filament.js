@@ -526,7 +526,7 @@
   PL.tools.register({
     id: 'filament',
     name: 'Filament',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Thread field',
     about: 'Streamlines traced through a noise field, bundled into ropes, with small glyph marks strung along them. Part of the strands run along their paths in the animation.',
     inks: {

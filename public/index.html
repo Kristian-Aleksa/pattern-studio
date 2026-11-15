@@ -9,8 +9,11 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Pattern Studio">
 <meta property="og:description" content="Fully customizable generative pattern tool. Works offline in your browser.">
-<!-- the browser tab's little ball: neon yellow on dark tabs, a deeper lime that stands out on light ones -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cstyle%3Ecircle%7Bfill:%238fac00%7D@media (prefers-color-scheme:dark)%7Bcircle%7Bfill:%23e4ff3d%7D%7D%3C/style%3E%3Ccircle cx='16' cy='16' r='13'/%3E%3C/svg%3E">
+<!-- the browser tab's little ball: #0080FB on light and dark tabs alike -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%230080fb'/%3E%3C/svg%3E">
+<!-- Dark or light to start: light from 8 am to 5 pm on this device's clock (its time zone), dark the rest of the day.
+     Set here, before the page draws, so it never flashes the other one. -->
+<script>(function () { var h = new Date().getHours(), r = document.documentElement; if (h >= 8 && h < 17) r.setAttribute('data-theme', 'light'); else r.removeAttribute('data-theme'); })();</script>
 <style>
 /* ==========================================================================
    Aeonik (CoType Foundry, via This Is Our Shop), embedded so the app stays one offline file:
@@ -220,9 +223,9 @@ kbd {
 }
 a.brand { color: inherit; text-decoration: none; border-radius: var(--r); }
 a.brand:hover small { color: var(--muted); }
-/* "GENERATIVE TOOLS" reads "Generative tools", like the "Drafts" line under a Figma file name */
-.brand small { display: block; font: 400 var(--fs-xs)/1.3 var(--sans); color: var(--faint); margin-top: 2px; text-transform: lowercase; }
-.brand small::first-letter { text-transform: uppercase; }
+/* "Generative Tool" beside the name, as on the home page: smaller, in half the name's color (on the narrowest phones
+   it goes under the name; see the 480px query) */
+.brand small { font-size: var(--fs-2xs); font-weight: inherit; opacity: 0.5; }
 .side-nav { display: flex; gap: 2px; padding: 0 var(--sp-2) var(--sp-2); } /* Home, then the dark / light switch */
 .nav-item {
   display: flex;
@@ -243,7 +246,7 @@ a.brand:hover small { color: var(--muted); }
 .nav-item:hover { background: var(--raise); color: var(--text); }
 .nav-item[aria-current="true"] { background: var(--selected-bg); color: var(--text); }
 button.nav-item { background: none; text-align: left; }
-.style-pick { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--sp-1); align-items: center; padding: 0 var(--sp-2); }
+.style-pick { padding: 0 var(--sp-2); }
 .style-pick select.sel { width: 100%; font-weight: 600; }
 .sidebar .panel { flex: 1; border-left: 0; background: none; }
 
@@ -282,8 +285,7 @@ button.nav-item { background: none; text-align: left; }
 }
 .title { min-width: 0; flex: 1; }
 .title h1 { margin: 0; font-size: var(--fs-xl); font-weight: 600; letter-spacing: -0.005em; display: flex; align-items: baseline; gap: var(--sp-2); white-space: nowrap; overflow: hidden; }
-.title h1 small { font: 500 var(--fs-xs) var(--sans); color: var(--accent-text); background: var(--selected-bg); border-radius: var(--r-xs); padding: 1px 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; text-transform: lowercase; }
-.title h1 small::first-letter { text-transform: uppercase; } /* app.js writes the kind in capitals: it reads "Backgrounds", like the home cards */
+.title h1 small { font: 500 var(--fs-xs) var(--sans); color: var(--accent-text); background: var(--selected-bg); border-radius: var(--r-xs); padding: 1px 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; } /* the style's category, as on its home card */
 .title p { margin: 2px 0 0; color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .actions {
   display: flex;
@@ -496,7 +498,7 @@ button.nav-item { background: none; text-align: left; }
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
 }
-/* "Settings" and "Output" read like Figma's selected Design tab */
+/* "Output" reads like Figma's selected Design tab */
 .panel-head b { font: 600 var(--fs-sm)/16px var(--sans); color: var(--text); background: var(--raise); border-radius: var(--r); padding: 4px 8px; }
 .note.about { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--line); margin: 0; }
 .note.about b { color: var(--text); font-weight: 600; }
@@ -842,17 +844,35 @@ select.sel:focus, input.txt:focus { border-color: var(--accent); outline: none; 
 /* The top section: a large title and subheading over the search row (positioned, so a background animation
    can fill it later). */
 .home-head { position: relative; margin: 0 auto var(--sp-8); max-width: 1180px; padding-top: var(--sp-8); }
-.home-head h1 { font-size: var(--fs-display); line-height: 1.1; letter-spacing: 0; margin: 0 0 var(--sp-3); font-weight: 500; } /* Aeonik's own spacing: tighter makes the tt in Pattern touch */
+/* The title row: Pattern Studio with "Generative Tool" beside it (half its size, half its color), and GitHub and
+   Contact at the right end; on a phone they go above it (see the 600px query) */
+.home-title { --title-fs: var(--fs-display); --link-fs: var(--fs-md); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-4); margin: 0 0 var(--sp-5); }
+.home-head h1 { font-size: var(--title-fs); line-height: 1.1; letter-spacing: 0; margin: 0; font-weight: 500; min-width: 0; } /* Aeonik's own spacing: tighter makes the tt in Pattern touch */
+.home-head h1 span { font-size: 0.5em; opacity: 0.5; white-space: nowrap; }
+/* GitHub and Contact sit on the title's visual middle. Boxes centred on each other aren't enough: Aeonik's letters sit
+   low in their box, and lower the bigger the type (with the lowercase carrying the weight, about 0.09em for the title
+   and 0.084em for the links, measured from the drawn letters), so the links come down by the difference. */
+.home-links { display: flex; gap: var(--sp-1); margin-left: auto; margin-right: calc(-1 * var(--sp-3)); transform: translateY(calc(var(--title-fs) * 0.09 - var(--link-fs) * 0.084)); } /* the words line up with the right edge */
+.home-link { height: 32px; padding: 0 var(--sp-3); border-radius: var(--r-md); border: 0; background: none; color: var(--text); display: inline-flex; align-items: center; font-size: var(--link-fs); font-weight: 500; text-decoration: none; white-space: nowrap; transition: background 0.12s; }
+.home-link:hover { background: var(--raise); }
+.home-link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .home-head p { color: var(--muted); max-width: 680px; margin: 0; font-size: var(--fs-subhead); line-height: 1.5; text-wrap: pretty; } /* no single word left on the last line */
 .home-intro { min-width: 0; }
-/* One row under the intro, like the filter row on Figma's Community page: the search and the dark / light switch on
-   the left; the style count, Play previews and the order of the cards on the right. The search narrows to keep them
-   on one row; when there's still no room (a phone), the count and the order menu move to the row below. */
-.home-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-4); margin-top: var(--sp-8); }
-.home-side { display: flex; align-items: center; gap: var(--sp-2); margin-left: auto; }
-.home-side .home-meta { margin-right: var(--sp-2); }
-.home-view { display: flex; align-items: center; gap: var(--sp-2); }
-/* Play previews and the order menu: outlined chips with an icon, like Figma's "Design resources" filters */
+/* Under the intro: the style count at the left; under it one row, like the filter row on Figma's Community page: the
+   search and the dark / light switch on the left; the category and order menus and Play previews on the right. The
+   search narrows to keep them on its row; when they still don't fit beside it, the three get a row of their own under
+   it, sharing its width (the homebar query below). */
+.home-bar { container: homebar / inline-size; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-4); margin-top: var(--sp-6); }
+.home-status { flex: 1 1 100%; display: flex; align-items: center; }
+.home-view { display: flex; align-items: center; gap: var(--sp-2); margin-left: auto; }
+/* 726px: the search at its narrowest (260px), the gap (16px) and the three (450px with "Stop previews") */
+@container homebar (max-width: 726px) {
+  .home-view { flex: 1 1 100%; flex-wrap: wrap; margin-left: 0; min-width: 0; }
+  .home-view .home-sort { flex: 1 1 150px; min-width: 0; }
+  .home-view select.home-order { width: 100%; }
+  .home-view .home-btn { margin-left: auto; } /* on a line of its own (a very narrow window), still at the right */
+}
+/* Play previews and the two menus: outlined chips with an icon, like Figma's "Design resources" filters */
 .home-btn { flex: none; height: 32px; padding: 0 var(--sp-3) 0 10px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel); color: var(--text); display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: var(--fs-md); font-weight: 500; white-space: nowrap; transition: background 0.12s, border-color 0.12s, color 0.12s; }
 .home-btn:hover { background: var(--raise); }
 .home-btn svg { width: 14px; height: 14px; color: var(--muted); }
@@ -888,22 +908,10 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
 .home-search input.txt { height: 32px; padding: 0 var(--sp-3) 0 32px; font-size: var(--fs-md); }
 .home-search input.txt::placeholder { color: var(--faint); }
 .home-empty { max-width: 1180px; margin: var(--sp-2) auto 0; color: var(--muted); font-size: var(--fs-md); }
-/* Under the last row of cards: GitHub • Contact, centred */
-/* GitHub • Contact: the dot on the page's centre line with a word either side, and level with the words
-   (its middle half a capital's height above their baseline, 0.36em in any of the fonts in --sans) */
-.home-foot { display: grid; grid-template-columns: 1fr auto 1fr; align-items: baseline; column-gap: 12px; max-width: 1180px; margin: 40px auto 4px; font-size: var(--fs-md); line-height: 1; }
-.home-foot a { color: var(--muted); text-decoration: none; padding: 6px 2px; border-radius: var(--r-xs); }
-.home-foot a:first-child { justify-self: end; }
-.home-foot a:last-child { justify-self: start; }
-.home-foot a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
-.home-foot .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--faint); position: relative; top: calc(2px - 0.36 * var(--fs-md)); }
-@supports (text-box: trim-both cap alphabetic) { /* exact: the words' boxes trimmed to their capitals, all three centred */
-  .home-foot { align-items: center; }
-  .home-foot a { text-box: trim-both cap alphabetic; padding: 8px 2px; }
-  .home-foot .dot { top: 0; }
-}
 .home-meta { font: var(--fs-xs) var(--sans); color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: var(--sp-2); }
-.home-meta i { width: 6px; height: 6px; border-radius: 50%; background: #14ae5c; box-shadow: 0 0 0 3px rgba(20, 174, 92, 0.18); }
+.home-meta i { width: 6px; height: 6px; margin-left: 3px; border-radius: 50%; background: #14ae5c; box-shadow: 0 0 0 3px rgba(20, 174, 92, 0.18); } /* its soft 3px ring lines up with the page's left edge */
+/* Under the last row of cards, where GitHub and Contact used to be */
+.home-note { max-width: 1180px; margin: 40px auto 4px; text-align: center; color: var(--muted); font-size: var(--fs-md); line-height: 1.5; }
 /* file cards: the preview on top over a divider, the name and details below */
 .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--sp-4); max-width: 1180px; margin: 0 auto; }
 .tool-card {
@@ -963,18 +971,18 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
   body { overflow: auto; }
   /* One column, the whole page scrolls: the strip (brand, Home, the dark / light switch, the style menu), the title and
      actions, the artboard and its status, the style's name and description, the output (frame, export, library), the
-     settings, and the kept strip at the bottom. The artboard stays pinned under the strip while everything below it
+     settings, and the kept strip at the bottom. (In the strip, Default is the icon after Home and dark / light.) The artboard stays pinned under the strip while everything below it
      scrolls underneath, so every change to a setting shows as it happens.
      (main's and both settings boxes' children join the page's grid, ordered here.) */
   .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; height: auto; }
   .main, .sidebar { display: contents; }
-  .side-top { order: 0; position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 6px 10px; overflow-x: auto; }
+  .side-top { order: 0; position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 6px 10px; overflow-x: auto; border-bottom: 1px solid var(--line); }
   .brand { flex: none; padding: 4px 6px; font-size: var(--fs-lg); }
   .brand small { font-size: var(--fs-2xs); }  /* the phone strip stays compact */
   .side-top .side-nav { flex: none; padding: 0; }
   .side-top .nav-item { flex: none; justify-content: center; padding: 10px 8px; }
   .nav-item .text { display: none; }
-  .style-pick { flex: 1; min-width: 170px; padding: 0; }
+  .style-pick { flex: 1; min-width: 110px; padding: 0; }
   .topbar { order: 1; flex-wrap: wrap; }
   .title { flex-basis: 100%; }  /* the title on its own line, the toolbar under it */
   /* --strip-h: the strip's height; --fit-h: the height that fits the frame's shape at this width (app.js) */
@@ -993,7 +1001,6 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
   #panel > * { background: var(--panel); }
   #panel > .note.about { order: 5; border-top: 1px solid var(--line); }
   .outputs { order: 6; border-left: 0; }
-  #panel > .panel-head { order: 7; }
   #panel > .sec { order: 8; }
   .kept { order: 9; }
   .app:not(.is-home) .kept { border-top: 0; } /* the last setting's line is right above it */
@@ -1009,28 +1016,35 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
 @media (hover: none), (pointer: coarse) {
   #previewsBtn { display: none; }
 }
-/* Phones: the search across the page; under it the style count (left) and the order menu (right) */
+/* Phones: the title, Generative Tool, GitHub and Contact on one row; then the style count, the search across the page,
+   and the category and order menus side by side, sharing the width (Play previews too, where it shows) */
 @media (max-width: 600px) {
   :root { --fs-display: 32px; --fs-subhead: 15px; }  /* phones: smaller still */
   .home-head { padding-top: var(--sp-2); }
-  .home-bar { margin-top: var(--sp-6); }
-  .home-tools { flex: 1 1 100%; max-width: none; }
-  .home-side { flex: 1 1 100%; margin-left: 0; justify-content: space-between; flex-wrap: wrap; row-gap: 10px; }
-  .home-side .home-meta { margin-right: 0; }
-  .home-view { min-width: 0; }
-  .home-sort { flex: 0 1 auto; min-width: 0; }
-  select.home-order { max-width: 100%; }
+  /* The title shrinks as much as it needs to keep the row on one line (all 32px from about 450px wide up): 100cqi is
+     the row's width, 118px what GitHub and Contact take with the gap (and a little spare), 10.5 the title's width per
+     px of size. Below about 330px wide, Generative Tool goes under the title instead. */
+  .home-title { --title-fs: clamp(16px, calc((100cqi - 118px) / 10.5), var(--fs-display)); --link-fs: var(--fs-sm); flex-wrap: nowrap; gap: var(--sp-3); margin-bottom: var(--sp-4); container-type: inline-size; }
+  .home-head h1 { flex: 1 1 auto; }
+  .home-head h1 span { font-size: max(0.5em, 10px); }
+  .home-links { flex: none; gap: 0; margin-right: -6px; }
+  .home-link { padding: 0 6px; }
+  .home-bar { margin-top: var(--sp-5); gap: 10px var(--sp-4); }
+  .home-tools { flex: 1 1 100%; max-width: none; } /* the search across the page */
+}
+@media (max-width: 480px) {
+  .brand small { display: block; margin-top: 1px; } /* Generative Tool under the name: the strip has no room beside it */
 }
 @media (max-width: 380px) and (hover: none), (max-width: 380px) and (pointer: coarse) {
-  .home-side { gap: 6px; }
+  .home-view { gap: 6px; }
   .home-meta { font-size: var(--fs-2xs); gap: 6px; }
   .home-sort > span { left: 9px; }
   select.home-order { padding-left: 28px; font-size: var(--fs-sm); }
 }
 @media (max-width: 350px) and (hover: none), (max-width: 350px) and (pointer: coarse) {
-  /* the smallest phones: no room for both on one row, so the order menu goes under the count */
-  .home-side { flex-wrap: wrap; }
-  .home-view, .home-sort, select.home-order { width: 100%; }
+  /* the smallest phones: no room for both menus on one row, so they stack */
+  .home-view { flex-wrap: wrap; }
+  .home-view .home-sort { flex: 1 1 100%; }
 }
 @media (hover: none) {
   .gens button { width: 24px; height: 28px; }
@@ -1047,8 +1061,9 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
   <!-- Left: the style menu and the style's own settings. Middle: the artboard. Right: output, export, shortcuts and the library. -->
   <aside class="sidebar" aria-label="Pattern settings">
     <div class="side-top">
+      <!-- the name with "Generative Tool" beside it, as on the home page -->
       <a class="brand" id="brand" href="#/" title="Home: all pattern styles">
-        <div>Pattern Studio<small>GENERATIVE TOOLS</small></div>
+        <div>Pattern Studio <small>Generative Tool</small></div>
       </a>
       <nav class="side-nav" aria-label="Main">
         <a class="nav-item" id="homeNav" href="#/" title="Home: all pattern styles (H)">
@@ -1057,8 +1072,10 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
         </a>
         <!-- Dark / light: filled in by app.js (the same switch as the one by the home search) -->
         <button class="nav-item" id="themeNav" type="button"></button>
+        <!-- Default: the style back to its original look (filled in by app.js; the D key does the same) -->
+        <button class="nav-item" id="defaultBtn" type="button" aria-label="Default" title="Default: back to this style's original look — colors, settings and seed (D)"></button>
       </nav>
-      <!-- the style switcher: previous, every style, next (filled in by app.js) -->
+      <!-- the style switcher: every style by name (filled in by app.js; [ and ] step through them) -->
       <div class="style-pick" id="stylePick"></div>
     </div>
     <div class="panel inputs" id="panel"></div>
@@ -1084,8 +1101,7 @@ select.home-order:focus-visible { outline: none; border-color: var(--accent); }
   <aside class="outputs" aria-label="Output, export and shortcuts">
     <div class="panel" id="panelOut"></div>
     <div class="side-foot">
-      <div class="offline" title="Runs 100% offline. Nothing is uploaded or fetched."><i></i><span class="text">Offline · nothing uploaded</span></div>
-      <button class="btn ghost" id="helpBtn" title="Keyboard shortcuts (?)">?<span class="text">&nbsp;Shortcuts</span></button>
+      <div class="offline" title="Runs 100% offline. Nothing is uploaded or fetched."><i></i><span class="text">Available now</span></div>
     </div>
   </aside>
 </div>
@@ -2733,7 +2749,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'sonar',
     name: 'Sonar',
-    kind: 'Backgrounds',
+    kind: 'Halftone',
     tagline: 'Dithered landmasses',
     about: 'A coastline cut from a noise field, filled as a halftone grid and dissolving into two colors of speckle at its edge.',
     inks: {
@@ -3268,7 +3284,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'culture',
     name: 'Culture',
-    kind: 'Backgrounds',
+    kind: 'Organic',
     tagline: 'Grainy colony fields',
     about: 'Soft cells that fuse where they meet, banded into rings of your inks around a solid core, and buried in film grain or print stipple.',
     raster: true,
@@ -3595,7 +3611,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'cipher',
     name: 'Cipher',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Glyph rivers',
     about: 'A river of glyphs on a dark grid: solid squares down the middle, diamonds, x’s and ringed squares toward the edges, each band in its own ink, with stray flecks and scanline smears.',
     inks: {
@@ -3860,7 +3876,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'dahlia',
     name: 'Dahlia',
-    kind: 'Backgrounds',
+    kind: 'Pop art',
     tagline: 'Burst posters',
     about: 'Rays of short dashes burst from a centre and grow as they reach the rim, each dash printed as a stack of offset inks and capped with a bead, under print grain.',
     inks: {
@@ -4611,7 +4627,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'coral',
     name: 'Coral',
-    kind: 'Backgrounds',
+    kind: 'Pop art',
     tagline: 'Sea-fan textile',
     about: 'Ribbed coral branches fan out and split across a dark ground, passing under and over torn paper with a dot screen, with drop shadows and print grain.',
     inks: {
@@ -5119,7 +5135,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'whorl',
     name: 'Whorl',
-    kind: 'Backgrounds',
+    kind: 'Pop art',
     tagline: 'Warped op-art',
     about: 'Stripes bend around invisible centres into rings, eyes and saddles, then a smooth, turbulent or rippled warp bends them further. Flat color, crisp vector edges.',
     inks: {
@@ -5565,7 +5581,7 @@ PL.tools = (() => {
   // map (General's Rotation and Size): the canvas (cw x ch) and the part of the world it shows (its pixel
   // (x, y) shows the world at (mx + x ms, my + y ms), frame px). The pieces, screens, outlines and arcs are
   // the world's; the mottle stays one cell per canvas pixel or so.
-  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map }) {
+  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map, transparent = false }) {
     const L = Math.max(W, H), aw = W / L, ah = H / L;
     const cw = map ? map.cw : W, ch = map ? map.ch : H, mx = map ? map.x0 : 0, my = map ? map.y0 : 0, ms = map ? map.s : 1;
     const n = colors.length;
@@ -5713,7 +5729,7 @@ PL.tools = (() => {
             if (q < 0) q = 0; else if (q > S1) q = S1;
             ink = ramp[q];
           }
-          buf[row + x] = LUTg[(ink << 5) + GR[gy | gX[gx0 + x]]];
+          buf[row + x] = transparent && ink === 0 ? 0 : LUTg[(ink << 5) + GR[gy | gX[gx0 + x]]]; // Transparent: the Key ink left out
         }
       }
     }
@@ -5740,7 +5756,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'splice',
     name: 'Splice',
-    kind: 'Backgrounds',
+    kind: 'Halftone',
     tagline: 'Cut-up riso',
     about: 'One field of soft hills, cut into pieces that each print it in their own screen and inks: dots, lines, pixels or flat, with contour outlines, thin arcs and riso grain.',
     raster: true,
@@ -6292,7 +6308,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'filament',
     name: 'Filament',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Thread field',
     about: 'Streamlines traced through a noise field, bundled into ropes, with small glyph marks strung along them. Part of the strands run along their paths in the animation.',
     inks: {
@@ -6716,7 +6732,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'stipple',
     name: 'Stipple',
-    kind: 'Backgrounds',
+    kind: 'Halftone',
     tagline: 'Halftone dots',
     about: 'Dot fields read from a noise field: halftone lattices and contour scatters that gather along the color-band edges, with a few accent dots. The edges drift in the animation, so dots blink on and off along them.',
     inks: {
@@ -6909,7 +6925,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'rise',
     name: 'Rise',
-    kind: 'Backgrounds',
+    kind: 'Pop art',
     tagline: 'Stripe arcs',
     about: 'Vertical stripes with nested arcs rising from an edge or the centre; inside each arc the stripe and ground colors trade places. In the animation the arcs swell and settle in a smooth wave that rises out from the anchor.',
     inks: {
@@ -7332,7 +7348,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'prism',
     name: 'Prism',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Pixel aurora',
     about: 'Chunky pixel streams fanning across a black dot-grid field: a white core with a rainbow fringe that breaks up into scattered pixels. In the animation every pixel shimmers across the band edges.',
     inks: {
@@ -7755,7 +7771,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'motley',
     name: 'Motley',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Glyph patchwork',
     about: 'Ragged blobs and stepped blocks laid over one another on a grid, each filled with squares, circles, targets, pluses, stripes or dots in one ink; some woven into the shape below, some outlined in stitches, some cut back to the ground. In the animation the woven glyphs twinkle as they drop out for a moment.',
     inks: {
@@ -8032,7 +8048,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'warp',
     name: 'Warp',
-    kind: 'Backgrounds',
+    kind: 'Pop art',
     tagline: 'Op-art pattern',
     about: 'Checkerboards and slashed stripes in a bright ink on black, bent by waves, a taper or a pinch. In the animation the warp breathes: the pattern bends further, eases back and bends again.',
     inks: {
@@ -8308,7 +8324,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'stitch',
     name: 'Stitch',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Glitched pixel grid',
     about: 'A grid of square cells colored from a noise field cut into levels: tall streaks, bands of rows slid sideways like a glitch, round blobs of one color and a scatter of stray cells, all ruled with thin dark lines. In the animation the field drifts round a small circle, so the cells step through the colors.',
     inks: {
@@ -8788,7 +8804,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'quilt',
     name: 'Quilt',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Pixel blanket',
     about: 'Woven pixel blankets, mirrored from the middle: crosses, stars and diamonds, plaid, gingham, basket weave, bands, tabs, steps, zigzags, waves, rings and a knitted dither. In the animation the weave flows toward the middle, the rings ripple out and the motifs swap colors, one cell at a time.',
     inks: {
@@ -9156,7 +9172,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'modular',
     name: 'Modular',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Modular grid',
     about: 'A modular grid: modules joined into bigger pieces, each one empty, solid, a pixel field, a dot matrix, a line grid or a gradient, over fine rules. In the animation the pixel fields and the dots flicker as their field drifts, in four soft beats per loop.',
     inks: {
@@ -9655,7 +9671,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'husk',
     name: 'Husk',
-    kind: 'Backgrounds',
+    kind: 'Organic',
     tagline: 'Husk scatter',
     about: 'Lumpy husks scattered over a ground, each a dark skin over a kernel that shows through as a dot screen or in crumbs, deepest in the middle, with fine grain over everything. In the animation every husk circles its own path through the fixed screen, so the dots swell and the crumbs open and close.',
     raster: true,
@@ -9898,7 +9914,7 @@ PL.tools = (() => {
   let RAMP_POW = -1;
   // map (General's Rotation and Size): the canvas (cw x ch) and the part of the world it shows; the grids
   // are as fine on the canvas as at 100 %, so zoomed in the streaks are read again at full detail.
-  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map }) {
+  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map, transparent = false }) {
     const n = colors.length;
     const m = Math.min(W, H);
     const cw = map ? map.cw : W, ch = map ? map.ch : H, mx = map ? map.x0 : 0, my = map ? map.y0 : 0, ms = map ? map.s : 1;
@@ -9963,6 +9979,10 @@ PL.tools = (() => {
         let h = XH[x] ^ gyh;
         h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d); h ^= h >>> 13;
         const gn = amp * LUM[h & 4095];
+        if (transparent) { // Transparent: the wash is left out, so the tints stay, as see-through as the wash was strong
+          d[i4] = tr + gn; d[i4 + 1] = tgn + gn; d[i4 + 2] = tb + gn; d[i4 + 3] = (1 - w) * 255;
+          continue;
+        }
         d[i4] = tr + (wr - tr) * w + gn;
         d[i4 + 1] = tgn + (wg - tgn) * w + gn;
         d[i4 + 2] = tb + (wb - tb) * w + gn;
@@ -9977,12 +9997,11 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'mist',
     name: 'Mist',
-    kind: 'Backgrounds',
+    kind: 'Gradients',
     tagline: 'Neon wash',
     about: 'A soft wash of vertical streaks over pastel tints, printed with an ordered color dither that turns it neon. Rotation turns the whole pattern. In the animation the streaks swing slowly up and down along their length, the tints trailing behind, through the fixed dither, so the dots shimmer.',
     raster: true,
     colorDither: true,   // opens with the color dither on (and kept on in looks saved before every style had it)
-    opaque: true,        // no background colour to leave out
     inks: {
       min: 2, max: 8, roles, fit, spec, add, generate,
       span: () => 2, // Invert swaps the wash and the first tint
@@ -10178,7 +10197,7 @@ PL.tools = (() => {
   /* ---- build ------------------------------------------------------------------------------- */
   // region (General's Rotation and Size): the part of the world to cover; the terrain and its grid run on
   // past the frame, so zooming out shows more of the same map.
-  function build({ W, H, aspect, seed, p, colors, t = 0, anim, region }) {
+  function build({ W, H, aspect, seed, p, colors, t = 0, anim, region, transparent = false }) {
     const asp = aspect > 0 ? aspect : W / H;
     const { cols, rows } = grid(p, asp);
     const R = region;
@@ -10196,7 +10215,7 @@ PL.tools = (() => {
       for (let i = c0 + 1; i <= c1; i++) {
         const a = L[row + i0] % n;
         if (i < c1 && L[row + i] % n === a) continue;
-        PL.Scene.rect(inkL[a], X(i0), Y(j), X(i) - X(i0), Y(j + 1) - Y(j));
+        if (!(transparent && a === 0)) PL.Scene.rect(inkL[a], X(i0), Y(j), X(i) - X(i0), Y(j + 1) - Y(j)); // Transparent: Ink 1's cells left out
         i0 = i;
       }
     }
@@ -10236,7 +10255,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'atlas',
     name: 'Atlas',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Text-mode terrain',
     about: 'A map in a character grid: warped noise terrain cut into terraces, each cell in its terrace\'s ink, with characters that climb their set as the land rises.',
     inks: {
@@ -10253,7 +10272,6 @@ PL.tools = (() => {
       fx: {},
     },
     recolorable: false, // the type's ink depends on the colours
-    opaque: true,
     build,
     zoom: true, // draws any region of its world (General's Rotation and Size)
     _K: K,
@@ -10833,7 +10851,7 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'strand',
     name: 'Strand',
-    kind: 'Backgrounds',
+    kind: 'Organic',
     tagline: 'Rod chains',
     about: 'Strands of rods that wander, fork and cross, printed slightly off register: a bright ink over a pale plate on a dark ground, speckled, streaked or screened toward its edges.',
     raster: true,
@@ -11206,7 +11224,7 @@ PL.tools = (() => {
   // reads the world at its middle, the field's grid as fine on the canvas as at 100 % (so zoomed in it is
   // read again at full detail), evened out as the frame's own samples are.
   let pvImg = null;
-  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map }) {
+  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map, transparent = false }) {
     const amount = anim ? Math.max(0, anim.amount) : 0;
     const N = clamp(Math.round(p.steps), 2, 24);
     const d = clamp01(p.drag / 100), tr = clamp01(p.tear / 100);
@@ -11293,7 +11311,7 @@ PL.tools = (() => {
         if (G) q += G[grow + ((x + gox) & 511)] * ga;
         let L = Math.floor(q);
         if (L < 0) L = 0; else if (L >= N) L = N - 1;
-        d8[o] = lr[L]; d8[o + 1] = lg[L]; d8[o + 2] = lb[L]; d8[o + 3] = 255;
+        d8[o] = lr[L]; d8[o + 1] = lg[L]; d8[o + 2] = lb[L]; d8[o + 3] = transparent && L === 0 ? 0 : 255; // Transparent: the Cold band left out
       }
     }
     ctx.putImageData(img, 0, 0);
@@ -11304,11 +11322,10 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'sear',
     name: 'Sear',
-    kind: 'Backgrounds',
+    kind: 'Gradients',
     tagline: 'Thermal smear',
     about: 'A heat map: a smooth noise field cut into flat bands from cold to hot, read in upright columns or smeared and torn sideways, with a fine grain on the band edges. In the animation the field sways up and back as it slowly changes.',
     raster: true,
-    opaque: true, // no background colour to leave out
     inks: {
       min: 2, max: 10, roles, fit, spec, add, generate,
       span: (n) => n, // Invert runs the ramp the other way
@@ -11640,7 +11657,7 @@ PL.tools = (() => {
   // fine on the canvas as at 100 %, and past the frame the crowd carries on: the world is laid out in tiles the
   // size of the crowd's box, the frame's own in its tile and every other tile a crowd of its own (a seed of its
   // own), all laid back to front together.
-  function glow(seed, p, W, H, t, amount, rgb, MP) {
+  function glow(seed, p, W, H, t, amount, rgb, MP, transparent) {
     const R = Math.sqrt(W * H), gc = R / K.grid, g = MP ? gc * MP.s : gc;
     const b = clamp01(p.blur / 100), hl = clamp01(p.halo / 100), rim = clamp01(p.rim / 100);
     const px = R / K.ref;                                       // px per reference px (824 x 618)
@@ -11688,7 +11705,9 @@ PL.tools = (() => {
     const U = new Float32Array(N), Gc = groups ? Array.from({ length: nc }, () => new Float32Array(N)) : null;
     const G0 = rgb[0], GL = rgb[2], cores = [rgb[1], ...rgb.slice(3)];
     const acc = new Float32Array(N * 3);
-    for (let k = 0; k < N; k++) { acc[3 * k] = G0[0]; acc[3 * k + 1] = G0[1]; acc[3 * k + 2] = G0[2]; }
+    // Transparent: no ground, and AL keeps how covered each point is (acc is then premultiplied by it)
+    const AL = transparent ? new Float32Array(N) : null;
+    if (!AL) for (let k = 0; k < N; k++) { acc[3 * k] = G0[0]; acc[3 * k + 1] = G0[1]; acc[3 * k + 2] = G0[2]; }
     const Hb = figHeight(p, R), th = 2 * Math.PI * t, orb = amount * K.orbit * R;
     let M = new Float32Array(0), T = new Float32Array(0);
     for (const { f, u, v } of figs) {
@@ -11746,6 +11765,7 @@ PL.tools = (() => {
           acc[o] += (GL[0] * (1 - rt * K.rimK[0]) - acc[o]) * ag;
           acc[o + 1] += (GL[1] * (1 - rt * K.rimK[1]) - acc[o + 1]) * ag;
           acc[o + 2] += (GL[2] * (1 - rt * K.rimK[2]) - acc[o + 2]) * ag;
+          if (AL) AL[o / 3] += (1 - AL[o / 3]) * ag;
         }
       }
     }
@@ -11767,8 +11787,9 @@ PL.tools = (() => {
       }
       const o = 3 * k;
       acc[o] += (cr - acc[o]) * tr; acc[o + 1] += (cg - acc[o + 1]) * tr; acc[o + 2] += (cb - acc[o + 2]) * tr;
+      if (AL) AL[k] += (1 - AL[k]) * tr;
     }
-    return { acc, gw, gh, g: gc, mc };
+    return { acc, AL, gw, gh, g: gc, mc };
   }
 
   /* ---- arrows: a loose grid in soft patches, each along the flow (the same at any frame) -------- */
@@ -11813,7 +11834,7 @@ PL.tools = (() => {
   })();
 
   // Draw one stroke (a capsule from (x0, y0) to (x1, y1), radius rad px) into the image, antialiased.
-  function stroke(d8, W, H, x0, y0, x1, y1, rad, col) {
+  function stroke(d8, W, H, x0, y0, x1, y1, rad, col, see = false) { // see: over see-through pixels (Transparent)
     const xa = Math.max(0, Math.floor(Math.min(x0, x1) - rad - 1)), xb = Math.min(W - 1, Math.ceil(Math.max(x0, x1) + rad + 1));
     const ya = Math.max(0, Math.floor(Math.min(y0, y1) - rad - 1)), yb = Math.min(H - 1, Math.ceil(Math.max(y0, y1) + rad + 1));
     const dx = x1 - x0, dy = y1 - y0, ll = dx * dx + dy * dy || 1;
@@ -11827,6 +11848,12 @@ PL.tools = (() => {
         const cov = rad + 0.5 - Math.sqrt(ex * ex + ey * ey);
         if (cov <= 0) continue;
         const a = cov >= 1 ? 1 : cov, o = (y * W + x) * 4;
+        if (see) {
+          const A = d8[o + 3] / 255, oa = a + A * (1 - a), k = A * (1 - a);
+          d8[o] = (col[0] * a + d8[o] * k) / oa; d8[o + 1] = (col[1] * a + d8[o + 1] * k) / oa; d8[o + 2] = (col[2] * a + d8[o + 2] * k) / oa;
+          d8[o + 3] = oa * 255;
+          continue;
+        }
         d8[o] += (col[0] - d8[o]) * a; d8[o + 1] += (col[1] - d8[o + 1]) * a; d8[o + 2] += (col[2] - d8[o + 2]) * a;
       }
     }
@@ -11835,10 +11862,10 @@ PL.tools = (() => {
   /* ---- paint ------------------------------------------------------------------------------- */
   let pvImg = null;
   // map (General's Rotation and Size): the canvas (cw x ch) and the part of the world it shows
-  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map }) {
+  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map, transparent = false }) {
     const amount = anim ? Math.max(0, anim.amount) : 0;
     const rgb = colors.map(PL.color.hexToRgb);
-    const { acc, gw, g, mc } = glow(seed | 0, p, W, H, t, amount, rgb, map);
+    const { acc, AL, gw, g, mc } = glow(seed | 0, p, W, H, t, amount, rgb, map, transparent);
     const CW = map ? map.cw : W, CH = map ? map.ch : H, ms = map ? map.s : 1, mx = map ? map.x0 : 0, my = map ? map.y0 : 0;
     if (preview) { if (!pvImg || pvImg.width !== CW || pvImg.height !== CH) pvImg = ctx.createImageData(CW, CH); }
     const img = preview ? pvImg : ctx.createImageData(CW, CH);
@@ -11851,11 +11878,14 @@ PL.tools = (() => {
       let o = y * CW * 4;
       for (let x = 0; x < CW; x++, o += 4) {
         const a = r0 + IX[x], b = r1 + IX[x], tx = TX[x];
+        let al = 1;
+        if (AL) { const pa = a / 3, pb = b / 3, top = AL[pa] + (AL[pa + 1] - AL[pa]) * tx, bot = AL[pb] + (AL[pb + 1] - AL[pb]) * tx; al = top + (bot - top) * ty; }
+        const ia = AL ? (al > 1e-4 ? 1 / al : 0) : 1;
         for (let c = 0; c < 3; c++) {
           const top = acc[a + c] + (acc[a + 3 + c] - acc[a + c]) * tx, bot = acc[b + c] + (acc[b + 3 + c] - acc[b + c]) * tx;
-          d8[o + c] = top + (bot - top) * ty;
+          d8[o + c] = (top + (bot - top) * ty) * ia;
         }
-        d8[o + 3] = 255;
+        d8[o + 3] = al * 255;
       }
     }
     // arrows, in the core's colour, over everything (on the canvas: sizes in its pixels)
@@ -11867,10 +11897,10 @@ PL.tools = (() => {
         const x = map ? (x0 - mx) / ms : x0, y = map ? (y0 - my) / ms : y0;
         const c = Math.cos(a), s = Math.sin(a);
         const tx = x + 0.5 * L * c, ty = y + 0.5 * L * s, bx = x - 0.5 * L * c, by = y - 0.5 * L * s;
-        stroke(d8, CW, CH, bx, by, tx, ty, rad, col);
+        stroke(d8, CW, CH, bx, by, tx, ty, rad, col, transparent);
         for (const sg of [-1, 1]) {
           const b2 = a + Math.PI - sg * K.headA;
-          stroke(d8, CW, CH, tx, ty, tx + hl * Math.cos(b2), ty + hl * Math.sin(b2), rad, col);
+          stroke(d8, CW, CH, tx, ty, tx + hl * Math.cos(b2), ty + hl * Math.sin(b2), rad, col, transparent);
         }
       }
     }
@@ -11882,11 +11912,10 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'crowd',
     name: 'Crowd',
-    kind: 'Backgrounds',
+    kind: 'Organic',
     tagline: 'Blurred crowd',
     about: 'A crowd seen through a heat camera: soft red figures, each wrapped in a green glow with a darker rim, laid one over another, under a field of small arrows that follow the flow. In the animation every figure drifts round its own small loop.',
     raster: true,
-    opaque: true,      // the ground is part of the picture
     stillGrain: true,  // the grain holds still while the figures drift
     inks: {
       min: 3, max: 8, roles, fit, spec, add, generate,
@@ -12082,7 +12111,7 @@ PL.tools = (() => {
   /* ---- the field on a grid: each sample's mixed colour (sRGB 0..255) --------------------------- */
   // M (General's Rotation and Size): the canvas (cw x ch) and the part of the world it shows; the grid is
   // as fine on the canvas as at 100 %, so zoomed in the clouds are read again at full detail.
-  function field(seed, p, W, H, t, amount, labs, M) {
+  function field(seed, p, W, H, t, amount, labs, M, transparent) {
     const n = labs.length, S0 = Math.min(W, H), g = S0 / K.grid;
     const cw = M ? M.cw : W, ch = M ? M.ch : H, mx = M ? M.x0 : 0, my = M ? M.y0 : 0, ms = M ? M.s : 1;
     const gw = Math.ceil(cw / g) + 2, gh = Math.ceil(ch / g) + 2;
@@ -12103,6 +12132,7 @@ PL.tools = (() => {
     for (let o = 0; o < K.oct; o++) amp[o] /= norm;
     const mf = K.mesh[0], wF = K.warpF;
     const out = new Float32Array(gw * gh * 3), f = new Float64Array(n);
+    const AL = transparent ? new Float32Array(gw * gh) : null; // Transparent: how much of each point isn't the first ink
     const sweepW = 1 / (K.sweep[2] * K.sweep[2]);
     for (let j = 0; j < gh; j++) {
       const v0 = ((my + j * g * ms - H / 2) / S0) * zoom;
@@ -12136,26 +12166,33 @@ PL.tools = (() => {
           f[k] = fk; if (fk > fmax) fmax = fk;
         }
         // a soft mix of the inks (softmax), blended in OKLab
-        let ws = 0, L = 0, A = 0, B = 0;
-        for (let k = 0; k < n; k++) { const w = Math.exp(kmix * (f[k] - fmax)); ws += w; L += w * labs[k][0]; A += w * labs[k][1]; B += w * labs[k][2]; }
-        L /= ws; A /= ws; B /= ws;
+        let ws = 0, L = 0, A = 0, B = 0, w0 = 0;
+        for (let k = 0; k < n; k++) {
+          const w = Math.exp(kmix * (f[k] - fmax));
+          ws += w;
+          if (AL && k === 0) { w0 = w; continue; } // Transparent: the first ink's share is left out, as see-through
+          L += w * labs[k][0]; A += w * labs[k][1]; B += w * labs[k][2];
+        }
+        const wi = ws - w0, al = AL ? wi / ws : 1;
+        if (wi > 1e-12) { L /= wi; A /= wi; B /= wi; } else { L = labs[1][0]; A = labs[1][1]; B = labs[1][2]; }
+        if (AL) AL[j * gw + i] = al;
         const l_ = L + 0.3963377774 * A + 0.2158037573 * B, m_ = L - 0.1055613458 * A - 0.0638541728 * B, s_ = L - 0.0894841775 * A - 1.291485548 * B;
         const l3 = l_ * l_ * l_, m3 = m_ * m_ * m_, s3 = s_ * s_ * s_;
         const o3 = 3 * (j * gw + i);
-        out[o3] = toS(4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3);
-        out[o3 + 1] = toS(-1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3);
-        out[o3 + 2] = toS(-0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3);
+        out[o3] = al * toS(4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3); // (with Transparent, premultiplied)
+        out[o3 + 1] = al * toS(-1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3);
+        out[o3 + 2] = al * toS(-0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3);
       }
     }
-    return { out, gw, gh, g, style: pl.style };
+    return { out, AL, gw, gh, g, style: pl.style };
   }
 
   /* ---- paint ------------------------------------------------------------------------------- */
   let pvImg = null;
-  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map }) {
+  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map, transparent = false }) {
     const amount = anim ? Math.max(0, anim.amount) : 0;
     const labs = colors.map((c) => rgbToLab(PL.color.hexToRgb(c)));
-    const { out, gw, g, style } = field(seed | 0, p, W, H, t, amount, labs, map);
+    const { out, AL, gw, g, style } = field(seed | 0, p, W, H, t, amount, labs, map, transparent);
     const cw = map ? map.cw : W, ch = map ? map.ch : H; // the canvas (with map: the part of the world it shows)
     if (preview) { if (!pvImg || pvImg.width !== cw || pvImg.height !== ch) pvImg = ctx.createImageData(cw, ch); }
     const img = preview ? pvImg : ctx.createImageData(cw, ch);
@@ -12167,11 +12204,14 @@ PL.tools = (() => {
       let o = y * cw * 4;
       for (let x = 0; x < cw; x++, o += 4) {
         const a = r0 + IX[x], b = r1 + IX[x], tx = TX[x];
+        let al = 1;
+        if (AL) { const pa = a / 3, pb = b / 3, top = AL[pa] + (AL[pa + 1] - AL[pa]) * tx, bot = AL[pb] + (AL[pb + 1] - AL[pb]) * tx; al = top + (bot - top) * ty; }
+        const ia = al > 1e-4 ? 1 / al : 0;
         for (let c = 0; c < 3; c++) {
           const top = out[a + c] + (out[a + 3 + c] - out[a + c]) * tx, bot = out[b + c] + (out[b + 3 + c] - out[b + c]) * tx;
-          d8[o + c] = top + (bot - top) * ty;
+          d8[o + c] = (top + (bot - top) * ty) * ia;
         }
-        d8[o + 3] = 255;
+        d8[o + 3] = al * 255;
       }
     }
     ctx.putImageData(img, 0, 0);
@@ -12182,12 +12222,11 @@ PL.tools = (() => {
   PL.tools.register({
     id: 'aura',
     name: 'Aura',
-    kind: 'Backgrounds',
+    kind: 'Gradients',
     tagline: 'Soft gradient',
     about: 'A soft gradient: every ink drifts in its own cloudy field and the inks blend where they meet, as turbulent clouds, broad patches or a sweep across the frame, printed with a fine color dither. In the animation the clouds roll round a small circle and slowly change shape.',
     raster: true,
     colorDither: true,   // opens with the color dither on (kept in looks saved before every style had it)
-    opaque: true,        // no background to leave out
     inks: {
       min: 2, max: 8, roles, fit, spec, add, generate,
       span: (n) => n, // Invert reverses the inks
@@ -12269,6 +12308,7 @@ PL.app = (() => {
     x: '<path d="M4.6 4.6l6.8 6.8M11.4 4.6l-6.8 6.8" stroke-width="1.8"/>',
     plus: '<path d="M8 3v10M3 8h10"/>',
     search: '<circle cx="7" cy="7" r="4.3"/><path d="M10.2 10.2 13.4 13.4"/>',
+    tiles: '<rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1.2"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1.2"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1.2"/><rect x="9" y="9" width="4.5" height="4.5" rx="1.2"/>',
     moon: '<path d="M13.3 9.7A5.6 5.6 0 0 1 6.3 2.7a5.6 5.6 0 1 0 7 7z"/>',
     sun: '<circle cx="8" cy="8" r="2.9"/><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/>',
   };
@@ -12321,22 +12361,80 @@ PL.app = (() => {
   const firstSeed = (id) => FIRST_SEEDS[id] || 1; // the seed of each tool's default look
 
   /* -------------------------------------------------------------- user data */
-  let userData = { palettes: [], kept: [], states: {} };
+  // Your palettes, kept variations and each style's last settings. They're saved in this browser on this device
+  // as you go (localStorage, one key each), so they're still here the next time the app opens; they don't
+  // follow you to other devices. A copy made with Save app copy carries them in its #pl-user-data block:
+  // opening one adds what it holds, once per copy, so things you've deleted since don't come back.
+  const MAX_PALETTES = 5;
+  const MAX_KEPT = 60;
+  const STORE = 'pattern-studio:'; // + palettes, kept, states, copies (the saved copies already added)
+  const store = (() => {
+    try { localStorage.setItem(STORE + 'test', '1'); localStorage.removeItem(STORE + 'test'); return localStorage; }
+    catch (e) { return null; } // storage blocked: it works as before, with Save app copy
+  })();
+  function readStore(key) {
+    try { return store ? JSON.parse(store.getItem(STORE + key) || 'null') : null; } catch (e) { return null; }
+  }
+  function writeStore(key, value) {
+    if (!store) return false;
+    try { store.setItem(STORE + key, JSON.stringify(value)); return true; }
+    catch (e) { console.warn('Could not save to this browser', e); return false; } // full
+  }
+  function textHash(t) { // names a saved copy's data
+    let x = 0x811c9dc5;
+    for (let i = 0; i < t.length; i++) { x ^= t.charCodeAt(i); x = Math.imul(x, 0x01000193); }
+    return (x >>> 0).toString(36) + '.' + t.length.toString(36);
+  }
+  const goodPalettes = (list) => (Array.isArray(list) ? list : [])
+    .map((p) => p && Array.isArray(p.colors) && { name: String(p.name || 'My palette').slice(0, 40), colors: p.colors.map(PL.color.normHex).filter(Boolean) })
+    .filter((p) => p && p.colors.length);
+  const goodKept = (list) => (Array.isArray(list) ? list : [])
+    .filter((k) => k && k.state && PL.tools.get(k.state.tool) && typeof k.thumb === 'string' && k.thumb.startsWith('data:image/'));
+
+  const userData = { palettes: goodPalettes(readStore('palettes')), kept: goodKept(readStore('kept')), states: {} };
+  const savedStates = readStore('states');
+  if (savedStates && typeof savedStates === 'object') userData.states = savedStates;
   try {
     const raw = ($('#pl-user-data').textContent || '').trim();
-    if (raw && raw !== '{}') {
+    const id = raw && raw !== '{}' && textHash(raw);
+    const added = readStore('copies') || [];
+    if (id && !added.includes(id)) {
       const d = JSON.parse(raw);
-      userData.palettes = Array.isArray(d.palettes) ? d.palettes : [];
-      userData.kept = Array.isArray(d.kept) ? d.kept : [];
-      userData.states = d.states && typeof d.states === 'object' ? d.states : {};
+      const havePal = new Set(userData.palettes.map((p) => p.colors.join()));
+      for (const p of goodPalettes(d.palettes)) {
+        if (havePal.has(p.colors.join()) || userData.palettes.length >= MAX_PALETTES) continue;
+        userData.palettes.push(p);
+        havePal.add(p.colors.join());
+      }
+      const haveKept = new Set(userData.kept.map((k) => JSON.stringify(k.state)));
+      for (const k of goodKept(d.kept)) if (!haveKept.has(JSON.stringify(k.state))) userData.kept.push(k);
+      userData.kept.sort((a, b) => (b.at || 0) - (a.at || 0)).splice(MAX_KEPT);
+      if (d.states && typeof d.states === 'object') Object.assign(userData.states, d.states); // the copy you opened
+      const saved = [writeStore('palettes', userData.palettes), writeStore('kept', userData.kept), writeStore('states', userData.states)];
+      if (saved.every(Boolean)) writeStore('copies', [id, ...added].slice(0, 20));
     }
   } catch (e) {
     console.warn('Could not read saved library', e);
   }
+
+  // Palettes and kept variations save the moment they change (each style's settings: see saveStates). If this
+  // browser won't save them, it's the old way: a dot on Save app copy and a warning before you leave. Returns
+  // false when the browser saves but has run out of room, so the message about what changed can say so.
   let libraryDirty = false;
-  const markDirty = () => { libraryDirty = true; updateLibraryBadge(); };
+  const NO_ROOM = 'this browser has no room left to save it. Use Save app copy to keep it';
+  function markDirty() {
+    if (writeStore('palettes', userData.palettes) && writeStore('kept', userData.kept)) return true;
+    libraryDirty = true;
+    updateLibraryBadge();
+    return !store;
+  }
   window.addEventListener('beforeunload', (e) => {
     if (libraryDirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+  // The app open in two tabs: what one keeps or saves shows in the other (and isn't written over)
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORE + 'palettes') { userData.palettes = goodPalettes(readStore('palettes')); renderPalettes(); }
+    else if (e.key === STORE + 'kept') { userData.kept = goodKept(readStore('kept')); renderKept(); }
   });
 
   /* ------------------------------------------------------------------ state */
@@ -12447,6 +12545,22 @@ PL.app = (() => {
     S = states[tool.id];
   }
 
+  // Each style's settings, saved on this device a moment after every edit (and as the page closes): only the
+  // styles that aren't on their default look, and which style was open last.
+  const DEFAULT_JSON = Object.fromEntries(TOOLS.map((tl) => [tl.id, JSON.stringify(defaultState(tl, firstSeed(tl.id)))]));
+  let statesTimer = 0;
+  function saveStates() {
+    clearTimeout(statesTimer);
+    statesTimer = 0;
+    if (!store) return;
+    const st = { __last: tool.id };
+    for (const tl of TOOLS) if (JSON.stringify(states[tl.id]) !== DEFAULT_JSON[tl.id]) st[tl.id] = states[tl.id];
+    writeStore('states', st);
+  }
+  const saveStatesSoon = () => { if (store && !statesTimer) statesTimer = setTimeout(saveStates, 400); };
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveStates(); });
+  window.addEventListener('pagehide', saveStates);
+
   function commit() {
     const H = hist[tool.id];
     const snap = JSON.stringify(S);
@@ -12456,6 +12570,7 @@ PL.app = (() => {
     if (H.list.length > 200) H.list.shift();
     H.idx = H.list.length - 1;
     updateHistoryButtons();
+    saveStatesSoon();
   }
   function stepHistory(dir) { goHistory(hist[tool.id].idx + dir); }
   // Jump to one step of this style's history (← and → step one at a time; the dots under the artboard jump).
@@ -12533,14 +12648,21 @@ PL.app = (() => {
     return [W, H];
   }
 
+  // Pixel render: the picture drawn on a small canvas, one pixel per Pixel-size cell of the frame (pixelGrid), then
+  // every pixel snapped to the nearest palette colour and the grid scaled up to the frame without smoothing
+  // (snapAndScale). Vector styles draw their shapes onto the grid (drawPixelated); pixel styles paint it
+  // (paintPixelated).
   let pixCanvas = null;
-  function drawPixelated(ctx, scene, W, H, st, unit, transparent, view) {
+  function pixelGrid(W, H, st, unit) {
     const px = Math.max(2, Math.round((st.fx.ditherPx || 2) * unit));
     const sw = Math.ceil(W / px), sh = Math.ceil(H / px);
     if (!pixCanvas) pixCanvas = document.createElement('canvas');
-    pixCanvas.width = sw;
+    pixCanvas.width = sw; // (also clears it)
     pixCanvas.height = sh;
-    const pc = pixCanvas.getContext('2d', { willReadFrequently: true });
+    return { px, sw, sh, pc: pixCanvas.getContext('2d', { willReadFrequently: true }) };
+  }
+  function drawPixelated(ctx, scene, W, H, st, unit, transparent, view) {
+    const grid = pixelGrid(W, H, st, unit), { px, sw, sh, pc } = grid;
     if (view) { // General: the ground over everything, then the shapes turned and zoomed (the pixels stay square to the frame)
       if (!transparent && scene.bg) { pc.fillStyle = scene.bg; pc.fillRect(0, 0, sw, sh); }
       pc.save();
@@ -12548,9 +12670,19 @@ PL.app = (() => {
       PL.render.drawScene(pc, scene, { transparent, ground: false });
       pc.restore();
     } else PL.render.drawScene(pc, scene, { transparent, scale: 1 / px });
-    // Snap every pixel to the nearest palette colour: crisp, palette-exact pixel art.
     // Translucent layers (shadows, overprints) are shading, not inks: snap to the solid inks only.
     const pal = [scene.bg, ...scene.layers.filter((l) => l.opacity == null || l.opacity >= 1).flatMap((l) => (l.grad ? l.grad.stops : [l.fill]))].filter(Boolean).map(PL.color.hexToRgb);
+    snapAndScale(ctx, W, H, grid, pal, transparent);
+  }
+  // A pixel style: painted straight onto the grid (each cell one pixel), snapped to its palette
+  function paintPixelated(ctx, W, H, st, unit, transparent, view, paintTo) {
+    const grid = pixelGrid(W, H, st, unit), { sw, sh, pc } = grid;
+    const info = view ? paintView(pc, sw, sh, view, (c, map) => paintTo(c, map, sw, sh)) : paintTo(pc, undefined, sw, sh);
+    snapAndScale(ctx, W, H, grid, st.colors.map(PL.color.hexToRgb), transparent);
+    return info;
+  }
+  // Snap every pixel to the nearest palette colour (crisp, palette-exact pixel art), then scale the grid up
+  function snapAndScale(ctx, W, H, { px, sw, sh, pc }, pal, transparent) {
     const img = pc.getImageData(0, 0, sw, sh);
     const d = img.data;
     const memo = new Map();
@@ -12590,9 +12722,10 @@ PL.app = (() => {
   // region: the part of the world to cover (General's Rotation and Size; none: the frame)
   function buildScene(tl, st, W, H, f, frames, useCache, preview, aspect, region) {
     const refL = Math.max(...exportDims(st.output));
-    const make = () => tl.build({ W, H, aspect, seed: st.seed, p: st.params, colors: st.colors, t: f / frames, anim: st.anim, crisp: !preview, refL, region });
+    const transparent = !!st.output.transparent;
+    const make = () => tl.build({ W, H, aspect, seed: st.seed, p: st.params, colors: st.colors, t: f / frames, anim: st.anim, crisp: !preview, refL, region, transparent });
     if (!useCache || tl.recolorable === false) return make();
-    const key = JSON.stringify([st.tool, st.seed, st.params, st.anim.amount, frames, W, H, aspect, st.colors.length, !!preview, refL, region || 0]);
+    const key = JSON.stringify([st.tool, st.seed, st.params, st.anim.amount, frames, W, H, aspect, st.colors.length, !!preview, refL, region || 0, transparent]);
     if (key !== sceneCache.key) { sceneCache.key = key; sceneCache.frames.clear(); }
     let scene = sceneCache.frames.get(f);
     if (scene) return PL.render.recolor(scene, st.colors);
@@ -12690,14 +12823,17 @@ PL.app = (() => {
     const aspect = opts.aspect || frameAspect(st.output, W, H);
     // the picture: a pixel style paints its canvas (map: the part of the world it shows, for General's
     // Rotation and Size); a vector style builds its shapes over the region of the world the frame shows
-    const paintTo = (c, map) => {
+    const paintTo = (c, map, Wp = W, Hp = H) => { // (Wp x Hp: the Pixel render's small grid)
       const refL = opts.preview ? Math.max(...exportDims(st.output)) : 0;
-      const r = tl.paint({ ctx: c, W, H, aspect, seed: st.seed, p: st.params, colors: st.colors, t: f / frames, anim: st.anim, frame: f, transparent, preview: !!opts.preview, refL, map });
+      const r = tl.paint({ ctx: c, W: Wp, H: Hp, aspect, seed: st.seed, p: st.params, colors: st.colors, t: f / frames, anim: st.anim, frame: f, transparent, preview: !!opts.preview, refL, map });
       return { count: (r && (r.count != null ? r.count : r.dots)) || 0, label: (r && r.label) || 'dots', text: r && r.status };
     };
     const view = viewOf(st);
     let info;
-    if (tl.paint) info = view ? paintView(ctx, W, H, view, paintTo) : paintTo(ctx, undefined);
+    if (tl.paint) {
+      if (st.output.render === 'pixel') info = paintPixelated(ctx, W, H, st, unit, transparent, view, paintTo);
+      else info = view ? paintView(ctx, W, H, view, paintTo) : paintTo(ctx, undefined);
+    }
     else {
       const scene = buildScene(tl, st, W, H, f, frames, !!opts.cache, !!opts.preview, aspect, view ? viewBox(W, H, view) : undefined);
       if (st.output.render === 'pixel') drawPixelated(ctx, scene, W, H, st, unit, transparent, view);
@@ -12710,7 +12846,7 @@ PL.app = (() => {
     // frame's short side (Pixel size 2 = 2 px when it is 713 px); on a Pixel render
     // they are its pixels, so the two grids line up.
     if (opts.fx !== false && PL.fx.isActive(st.fx)) {
-      const cell = !tl.paint && st.output.render === 'pixel' ? Math.max(2, Math.round((st.fx.ditherPx || 2) * unit)) : PL.fx.ditherCell(st.fx, W, H);
+      const cell = st.output.render === 'pixel' ? Math.max(2, Math.round((st.fx.ditherPx || 2) * unit)) : PL.fx.ditherCell(st.fx, W, H);
       PL.fx.apply(ctx, W, H, st.fx, { unit, cell, frame: tl.stillGrain ? 0 : f, seed: st.seed, colors: st.colors });
     }
     return info;
@@ -12963,10 +13099,10 @@ PL.app = (() => {
   function keep() {
     const st = deep(S);
     userData.kept.unshift({ state: st, thumb: thumbOf(st), at: Date.now() });
-    if (userData.kept.length > 60) userData.kept.pop();
-    markDirty();
+    if (userData.kept.length > MAX_KEPT) userData.kept.pop();
+    const saved = markDirty();
     renderKept();
-    toast('Kept — find it in the strip below');
+    toast(saved ? 'Kept — find it in the strip below' : `Kept, but ${NO_ROOM}`, saved ? undefined : 'err');
   }
   function renderKept() {
     const strip = $('#kept');
@@ -13052,7 +13188,7 @@ PL.app = (() => {
       return { svg: `${svgOpen(W, H, title)}\n<image width="${W}" height="${H}" xlink:href="${url}"/>\n</svg>\n`, W, H };
     }
     const v = viewOf(st);
-    const scene = tl.build({ W, H, aspect: frameAspect(st.output, W, H), seed: st.seed, p: st.params, colors: st.colors, t: (frameIdx % frames) / frames, anim: st.anim, region: v ? viewBox(W, H, v) : undefined });
+    const scene = tl.build({ W, H, aspect: frameAspect(st.output, W, H), seed: st.seed, p: st.params, colors: st.colors, t: (frameIdx % frames) / frames, anim: st.anim, region: v ? viewBox(W, H, v) : undefined, transparent: !!st.output.transparent });
     if (!v) return { svg: PL.render.sceneToSVG(scene, { transparent: st.output.transparent, title }), W, H };
     return { svg: `${svgOpen(W, H, title)}\n${viewSVGBody(scene, W, H, v, st.output.transparent)}\n</svg>\n`, W, H };
   }
@@ -13173,7 +13309,7 @@ PL.app = (() => {
           inner = `<image width="${W}" height="${H}" xlink:href="${await blobToDataURL(blob)}"/>`;
         } else {
           const v = viewOf(st);
-          const scene = tl.build({ W, H, aspect: frameAspect(st.output, W, H), seed: st.seed, p: st.params, colors: st.colors, t: f / N, anim: st.anim, region: v ? viewBox(W, H, v) : undefined });
+          const scene = tl.build({ W, H, aspect: frameAspect(st.output, W, H), seed: st.seed, p: st.params, colors: st.colors, t: f / N, anim: st.anim, region: v ? viewBox(W, H, v) : undefined, transparent: !!st.output.transparent });
           const P = `f${f + 1}-`; // every frame's own ids
           inner = (v ? viewSVGBody(scene, W, H, v, st.output.transparent) : svgParts(PL.render.sceneToSVG(scene, { transparent: st.output.transparent })).inner)
             .replace(/ id="/g, ` id="${P}`).replace(/href="#/g, `href="#${P}`).replace(/url\(#/g, `url(#${P}`);
@@ -13451,11 +13587,12 @@ PL.app = (() => {
       userData.kept.push({ state: st, thumb: typeof k.thumb === 'string' && k.thumb.startsWith('data:image/') ? k.thumb : thumbOf(st), at: k.at || Date.now() });
       nk++;
     }
-    if (np || nk) markDirty();
+    const saved = np || nk ? markDirty() : true;
     renderPalettes();
     renderKept();
     toast((np || nk ? `Added ${np} palette${np === 1 ? '' : 's'} and ${nk} kept variation${nk === 1 ? '' : 's'}` : 'Those palettes and kept variations are already here')
-      + (full ? ` (${full} more palette${full === 1 ? '' : 's'} didn’t fit: you can keep ${MAX_PALETTES})` : ''));
+      + (full ? ` (${full} more palette${full === 1 ? '' : 's'} didn’t fit: you can keep ${MAX_PALETTES})` : '')
+      + (saved ? '' : `, but ${NO_ROOM.replace('save it', 'save them').replace('keep it', 'keep them')}`), saved ? undefined : 'err');
   }
   function saveAppCopy() {
     const st = {};
@@ -13745,9 +13882,8 @@ PL.app = (() => {
     return btn;
   }
 
-  // My palettes: up to 5, kept for the whole app, so every style shows the same ones (Save app copy keeps
-  // them for next time). Click one to use it; × deletes it.
-  const MAX_PALETTES = 5;
+  // My palettes: up to 5 (MAX_PALETTES), kept for the whole app, so every style shows the same ones (saved on
+  // this device; Save app copy carries them to another). Click one to use it; × deletes it.
   function renderPalettes() {
     if (!paletteWrap) return;
     const mine = userData.palettes;
@@ -13780,9 +13916,9 @@ PL.app = (() => {
       const nm = (name.value || '').trim() || 'My palette ' + (userData.palettes.length + 1);
       userData.palettes.unshift({ name: nm.slice(0, 40), colors: S.colors.slice() });
       name.value = '';
-      markDirty();
+      const saved = markDirty();
       renderPalettes();
-      toast(`Saved “${nm}” to My palettes (${userData.palettes.length} of ${MAX_PALETTES}), in every style`);
+      toast(saved ? `Saved “${nm}” to My palettes (${userData.palettes.length} of ${MAX_PALETTES}), in every style` : `Added “${nm}” to My palettes, but ${NO_ROOM}`, saved ? undefined : 'err');
     };
     name.addEventListener('keydown', (e) => { if (e.key === 'Enter') savePal(); });
 
@@ -13836,7 +13972,7 @@ PL.app = (() => {
       group('ditherOn', 'dither', PL.fx.DITHER_KEYS, [
         toggleRow({ label: 'Dither', cls: 'fx-head', hint: 'Dither on / off', get: () => fx().ditherOn, set: (v) => (fx().ditherOn = v), onChange: syncControls }),
         selectRow({ label: 'Pattern', aria: 'Dither pattern', hint: 'Bayer: an even, ordered dot pattern (8 the finest, 2 the coarsest); Noise: dots at random', options: PL.fx.PATTERNS, get: () => fx().ditherPattern, set: (v) => (fx().ditherPattern = v), onChange: dither }),
-        rangeRow({ label: 'Pixel size', min: 1, max: 10, step: 1, unit: 'px', def: fxDef('ditherPx'), hint: tool.paint ? 'Size of the dither dots' : 'Size of the dither dots (and of the pixels of a Pixel render)', get: () => fx().ditherPx, set: (v) => (fx().ditherPx = v), onInput: dither }),
+        rangeRow({ label: 'Pixel size', min: 1, max: 10, step: 1, unit: 'px', def: fxDef('ditherPx'), hint: 'Size of the dither dots (and of the pixels of a Pixel render)', get: () => fx().ditherPx, set: (v) => (fx().ditherPx = v), onInput: dither }),
         rangeRow({ label: 'Tone', min: 0, max: 8, step: 1, def: fxDef('tones'), hint: 'How many colors the dither prints with: 0 = your darkest and lightest color, 1 = only your colors, 2–8 = levels of red, green and blue', get: () => fx().tones, set: (v) => (fx().tones = v), onInput: dither }),
         rangeRow({ label: 'Amount', aria: 'Dither amount', min: 0, max: 100, step: 1, unit: '%', def: fxDef('ditherAmt'), hint: 'How much of the dithered picture shows over the original', get: () => fx().ditherAmt, set: (v) => (fx().ditherAmt = v), onInput: dither }),
       ]),
@@ -13924,9 +14060,9 @@ PL.app = (() => {
       }),
       sizeRow,
       custom,
-      tool.paint ? null : segRow({ label: 'Render', options: [{ value: 'smooth', label: 'Smooth' }, { value: 'pixel', label: 'Pixel' }], get: () => o().render, set: (v) => (o().render = v) }),
-      tool.opaque ? null : toggleRow({ label: 'Transparent', hint: 'Export without the background color', get: () => o().transparent, set: (v) => (o().transparent = v) }),
-      tool.paint ? null : h('p', { class: 'note' }, h('b', null, 'Pixel'), ' snaps the art to a grid (Pixel size in Effects) using only your palette colors.'),
+      segRow({ label: 'Render', options: [{ value: 'smooth', label: 'Smooth' }, { value: 'pixel', label: 'Pixel' }], get: () => o().render, set: (v) => (o().render = v) }),
+      toggleRow({ label: 'Transparent', hint: 'Export without the background color (the first color of the palette)', get: () => o().transparent, set: (v) => (o().transparent = v) }),
+      h('p', { class: 'note' }, h('b', null, 'Pixel'), ' snaps the art to a grid (Pixel size in Effects) using only your palette colors.'),
     ]);
     syncCustom();
     return out;
@@ -13966,7 +14102,9 @@ PL.app = (() => {
         h('button', { class: 'btn', type: 'button', onclick: () => file.click(), title: 'Open a pattern you saved' }, icon('upload'), 'Upload pattern')
       ),
       h('p', { class: 'note' }, 'Save pattern downloads this pattern’s colors and settings as a small file. Upload pattern opens it again any time, on any computer.'),
-      h('p', { class: 'note' }, 'Your palettes and kept variations live in this window. To keep them for next time, save a copy of the app with them built in, then replace your old file.'),
+      h('p', { class: 'note' }, store
+        ? 'Your palettes, kept variations and settings are saved in this browser on this device, so they’re here next time. To use them on another computer, save a copy of the app with them built in.'
+        : 'Your palettes and kept variations live in this window. To keep them for next time, save a copy of the app with them built in, then replace your old file.'),
       h('button', { class: 'btn primary', type: 'button', onclick: saveAppCopy }, icon('file'), 'Save app copy', h('span', { id: 'libBadge', title: 'Unsaved changes', style: 'display:none;width:7px;height:7px;border-radius:50%;background:#111;margin-left:2px' })),
       file,
     ], false);
@@ -14031,10 +14169,6 @@ PL.app = (() => {
     bindings = [];
     const panel = $('#panel');
     panel.replaceChildren(
-      h('div', { class: 'panel-head' },
-        h('b', null, 'Settings'),
-        h('button', { class: 'btn ghost', type: 'button', onclick: restoreDefault, title: 'Default: back to this style\'s original look — colors, settings and seed (D)' }, icon('reset'), 'Default', h('kbd', null, 'D'))
-      ),
       h('p', { class: 'note about' }, h('b', null, tool.name + ' — '), tool.about),
       ...toolSections(),
       generalSection(),
@@ -14142,19 +14276,21 @@ PL.app = (() => {
   }
 
   /* ------------------------------------------------------------ style menu */
-  // The style switcher at the top of the settings: previous, every style by name, next ([ and ] do the same).
+  // The style switcher at the top of the settings: every style by name ([ and ] step to the previous / next one).
   let styleSel = null;
-  function stepTool(d) { go(TOOLS[(TOOLS.indexOf(tool) + d + TOOLS.length) % TOOLS.length].id); }
   function buildStylePick() {
     const el = $('#stylePick');
     if (!el) return;
     styleSel = h('select', { class: 'sel', 'aria-label': 'Pattern style', title: 'Pattern style ([ and ] step through them)' },
       TOOLS.map((t, i) => h('option', { value: t.id }, `${String(i + 1).padStart(2, '0')}  ${t.name}`)));
     styleSel.addEventListener('change', () => { styleSel.blur(); go(styleSel.value); });
-    el.replaceChildren(
-      h('button', { class: 'btn icon ghost', type: 'button', title: 'Previous style ([)', 'aria-label': 'Previous style', onclick: () => stepTool(-1) }, icon('back')),
-      styleSel,
-      h('button', { class: 'btn icon ghost', type: 'button', title: 'Next style (])', 'aria-label': 'Next style', onclick: () => stepTool(1) }, icon('fwd')));
+    el.replaceChildren(styleSel);
+    // Default, the last of Home and Dark mode, right above the menu: this style back to its original look
+    const def = $('#defaultBtn');
+    if (def && !def.firstChild) {
+      def.append(icon('reset'), h('span', { class: 'text' }, 'Default'));
+      def.addEventListener('click', restoreDefault);
+    }
   }
 
   /* ------------------------------------------------------------ routing
@@ -14348,6 +14484,13 @@ PL.app = (() => {
   };
   let homeOrder = 'old';
 
+  // Categories. Each style's category is its kind, in its file in src/tools (shown on its card and at the top of
+  // its page); this is the menu's order. The menu by the search shows one category at a time; like the order, the
+  // choice holds while you move between Home and the styles.
+  const CATEGORIES = ['Gradients', 'Halftone', 'Organic', 'Pixel & glyphs', 'Pop art'];
+  for (const t of TOOLS) if (!CATEGORIES.includes(t.kind)) CATEGORIES.push(t.kind); // a new one still shows
+  let homeCategory = '';
+
   // Phones and tablets can't hover (or point precisely): there the cards on screen play on their own (moveCards),
   // at their default settings (Strand at Intensity 2.00, say), as under the pointer on a computer, and the Play
   // previews button is hidden (styles.css).
@@ -14376,12 +14519,12 @@ PL.app = (() => {
       const q = search.value.trim().toLowerCase();
       let shown = 0;
       for (const c of cards) {
-        const hit = !q || c.t.name.toLowerCase().includes(q);
+        const hit = (!q || c.t.name.toLowerCase().includes(q)) && (!homeCategory || c.t.kind === homeCategory);
         c.card.hidden = !hit;
         if (hit) shown++;
       }
       none.hidden = shown > 0;
-      none.textContent = shown ? '' : `No pattern style called “${search.value.trim()}”.`;
+      none.textContent = shown ? '' : `No pattern style called “${search.value.trim()}”${homeCategory ? ` in ${homeCategory}` : ''}.`;
     };
     search.addEventListener('input', filter);
     search.addEventListener('keydown', (e) => {
@@ -14393,25 +14536,36 @@ PL.app = (() => {
       ORDERS.map(([value, label]) => h('option', { value }, label)));
     order.value = homeOrder;
     order.addEventListener('change', () => { homeOrder = order.value; grid.replaceChildren(...ordered().map((c) => c.card)); });
+    const category = h('select', { class: 'home-order', 'aria-label': 'Category of the styles', title: 'Show one category of styles' },
+      h('option', { value: '' }, 'All categories'),
+      CATEGORIES.map((name) => h('option', { value: name }, name)));
+    category.value = homeCategory;
+    category.addEventListener('change', () => { homeCategory = category.value; filter(); });
     $('#home').replaceChildren(
       h('header', { class: 'home-head' },
         h('div', { class: 'home-intro' },
-          h('h1', null, 'Pattern Studio'),
+          // the title with "Generative Tool" beside it, and GitHub and Contact at the right end of its row
+          h('div', { class: 'home-title' },
+            h('h1', null, 'Pattern Studio ', h('span', null, 'Generative Tool')),
+            h('nav', { class: 'home-links', 'aria-label': 'Links' }, footLink('GitHub', LINKS.github), footLink('Contact', LINKS.contact))
+          ),
           h('p', null, 'Generative pattern tool with over 20 different fully customizable designs to choose from. Create backgrounds for social media posts, websites, presentations or anything else you like, then export them as images, SVGs or seamless video loops. Pick a style to start. Works offline in your browser.')
         ),
-        // one row: the search and the dark / light switch; the style count, Play previews and the order menu
+        // the style count; under it the search and the dark / light switch, then the category and order menus and
+        // Play previews (at the right of the search's row, or on a row of their own under it when there's no room)
         h('div', { class: 'home-bar' },
+          h('div', { class: 'home-status' },
+            h('div', { class: 'home-meta' }, h('i'), `${TOOLS.length} ${TOOLS.length === 1 ? 'style' : 'styles'} · available`)
+          ),
           h('div', { class: 'home-tools' }, h('label', { class: 'home-search' }, icon('search'), search), themeButton()),
-          h('div', { class: 'home-side' },
-            h('div', { class: 'home-meta' }, h('i'), `${TOOLS.length} ${TOOLS.length === 1 ? 'style' : 'styles'} · available`),
-            h('div', { class: 'home-view' }, previewsButton(), h('label', { class: 'home-sort' }, icon('sort'), order))
-          )
+          h('div', { class: 'home-view' }, h('label', { class: 'home-sort' }, icon('tiles'), category), h('label', { class: 'home-sort' }, icon('sort'), order), previewsButton())
         )
       ),
       grid,
       none,
-      h('nav', { class: 'home-foot', 'aria-label': 'Links' }, footLink('GitHub', LINKS.github), h('span', { class: 'dot', 'aria-hidden': 'true' }), footLink('Contact', LINKS.contact))
+      h('p', { class: 'home-note' }, 'This tool works offline in your browser. None of your information is stored.')
     );
+    if (homeCategory) filter();
     requestAnimationFrame(alignKept);
     // Draw after layout so each preview matches its card size; hover plays the loop.
     // Cards always show each style's default look, whatever has been edited since.
@@ -14436,11 +14590,11 @@ PL.app = (() => {
     });
   }
 
-  // The links under the last row of cards. Fill these in: a web address (or mailto: for Contact).
-  // While one is empty its link says it's coming soon instead of going anywhere.
+  // GitHub and Contact, at the right of the home title. Fill these in: a web address (or mailto: for Contact).
+  // While one is empty its button says it's coming soon instead of going anywhere.
   const LINKS = { github: '', contact: '' };
   function footLink(label, url) {
-    const a = h('a', url ? { href: url, target: '_blank', rel: 'noopener noreferrer' } : { href: '#', 'data-soon': '' }, label);
+    const a = h('a', url ? { class: 'home-link', href: url, target: '_blank', rel: 'noopener noreferrer' } : { class: 'home-link', href: '#', 'data-soon': '' }, label);
     if (!url) a.addEventListener('click', (e) => { e.preventDefault(); toast(`The ${label} link is coming soon`); });
     return a;
   }
@@ -14458,10 +14612,11 @@ PL.app = (() => {
   }
   new ResizeObserver(onceNextFrame(alignKept)).observe(document.querySelector('#home'));
 
-  // Dark or light: the app always opens dark (nothing remembers it). Two switches, always in step: the
-  // round one by the home search, and the one next to Home at the top of a style's settings (named there;
-  // just its icon on a phone). Each shows a moon in dark mode and a sun in light mode; a click switches.
-  let theme = 'dark';
+  // Dark or light: it opens light from 8 am to 5 pm on this device's clock (its time zone) and dark the rest of
+  // the day; index.html sets that before the page draws. Two switches, always in step, change it for this
+  // visit (nothing remembers it): the round one by the home search, and the one next to Home at the top of a
+  // style's settings (named there; just its icon on a phone). Each shows a moon in dark mode and a sun in light.
+  let theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
   function setTheme(t) {
     theme = t === 'light' ? 'light' : 'dark';
     if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
@@ -14486,7 +14641,7 @@ PL.app = (() => {
   showTheme($('#themeNav'));
 
   function showToolHeader() {
-    $('#toolName').replaceChildren(tool.name, h('small', null, tool.kind.toUpperCase()));
+    $('#toolName').replaceChildren(tool.name, h('small', null, tool.kind));
     $('#toolAbout').textContent = tool.tagline;
     $('#toolAbout').title = tool.about;
     document.title = `${tool.name} — Pattern Studio`;
@@ -14518,7 +14673,6 @@ PL.app = (() => {
       h('div', { class: 'foot' }, h('button', { class: 'btn', type: 'button', onclick: modal.close }, 'Close')),
     ]);
   }
-  $('#helpBtn').addEventListener('click', showHelp);
 
   document.addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
