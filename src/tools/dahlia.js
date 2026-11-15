@@ -244,7 +244,7 @@
   PL.tools.register({
     id: 'dahlia',
     name: 'Dahlia',
-    kind: 'Backgrounds',
+    kind: 'Pop art',
     tagline: 'Burst posters',
     about: 'Rays of short dashes burst from a centre and grow as they reach the rim, each dash printed as a stack of offset inks and capped with a bead, under print grain.',
     inks: {

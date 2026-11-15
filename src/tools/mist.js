@@ -214,7 +214,7 @@
   let RAMP_POW = -1;
   // map (General's Rotation and Size): the canvas (cw x ch) and the part of the world it shows; the grids
   // are as fine on the canvas as at 100 %, so zoomed in the streaks are read again at full detail.
-  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map }) {
+  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map, transparent = false }) {
     const n = colors.length;
     const m = Math.min(W, H);
     const cw = map ? map.cw : W, ch = map ? map.ch : H, mx = map ? map.x0 : 0, my = map ? map.y0 : 0, ms = map ? map.s : 1;
@@ -279,6 +279,10 @@
         let h = XH[x] ^ gyh;
         h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d); h ^= h >>> 13;
         const gn = amp * LUM[h & 4095];
+        if (transparent) { // Transparent: the wash is left out, so the tints stay, as see-through as the wash was strong
+          d[i4] = tr + gn; d[i4 + 1] = tgn + gn; d[i4 + 2] = tb + gn; d[i4 + 3] = (1 - w) * 255;
+          continue;
+        }
         d[i4] = tr + (wr - tr) * w + gn;
         d[i4 + 1] = tgn + (wg - tgn) * w + gn;
         d[i4 + 2] = tb + (wb - tb) * w + gn;
@@ -293,12 +297,11 @@
   PL.tools.register({
     id: 'mist',
     name: 'Mist',
-    kind: 'Backgrounds',
+    kind: 'Gradients',
     tagline: 'Neon wash',
     about: 'A soft wash of vertical streaks over pastel tints, printed with an ordered color dither that turns it neon. Rotation turns the whole pattern. In the animation the streaks swing slowly up and down along their length, the tints trailing behind, through the fixed dither, so the dots shimmer.',
     raster: true,
     colorDither: true,   // opens with the color dither on (and kept on in looks saved before every style had it)
-    opaque: true,        // no background colour to leave out
     inks: {
       min: 2, max: 8, roles, fit, spec, add, generate,
       span: () => 2, // Invert swaps the wash and the first tint

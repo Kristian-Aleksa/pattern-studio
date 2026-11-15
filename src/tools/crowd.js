@@ -305,7 +305,7 @@
   // fine on the canvas as at 100 %, and past the frame the crowd carries on: the world is laid out in tiles the
   // size of the crowd's box, the frame's own in its tile and every other tile a crowd of its own (a seed of its
   // own), all laid back to front together.
-  function glow(seed, p, W, H, t, amount, rgb, MP) {
+  function glow(seed, p, W, H, t, amount, rgb, MP, transparent) {
     const R = Math.sqrt(W * H), gc = R / K.grid, g = MP ? gc * MP.s : gc;
     const b = clamp01(p.blur / 100), hl = clamp01(p.halo / 100), rim = clamp01(p.rim / 100);
     const px = R / K.ref;                                       // px per reference px (824 x 618)
@@ -353,7 +353,9 @@
     const U = new Float32Array(N), Gc = groups ? Array.from({ length: nc }, () => new Float32Array(N)) : null;
     const G0 = rgb[0], GL = rgb[2], cores = [rgb[1], ...rgb.slice(3)];
     const acc = new Float32Array(N * 3);
-    for (let k = 0; k < N; k++) { acc[3 * k] = G0[0]; acc[3 * k + 1] = G0[1]; acc[3 * k + 2] = G0[2]; }
+    // Transparent: no ground, and AL keeps how covered each point is (acc is then premultiplied by it)
+    const AL = transparent ? new Float32Array(N) : null;
+    if (!AL) for (let k = 0; k < N; k++) { acc[3 * k] = G0[0]; acc[3 * k + 1] = G0[1]; acc[3 * k + 2] = G0[2]; }
     const Hb = figHeight(p, R), th = 2 * Math.PI * t, orb = amount * K.orbit * R;
     let M = new Float32Array(0), T = new Float32Array(0);
     for (const { f, u, v } of figs) {
@@ -411,6 +413,7 @@
           acc[o] += (GL[0] * (1 - rt * K.rimK[0]) - acc[o]) * ag;
           acc[o + 1] += (GL[1] * (1 - rt * K.rimK[1]) - acc[o + 1]) * ag;
           acc[o + 2] += (GL[2] * (1 - rt * K.rimK[2]) - acc[o + 2]) * ag;
+          if (AL) AL[o / 3] += (1 - AL[o / 3]) * ag;
         }
       }
     }
@@ -432,8 +435,9 @@
       }
       const o = 3 * k;
       acc[o] += (cr - acc[o]) * tr; acc[o + 1] += (cg - acc[o + 1]) * tr; acc[o + 2] += (cb - acc[o + 2]) * tr;
+      if (AL) AL[k] += (1 - AL[k]) * tr;
     }
-    return { acc, gw, gh, g: gc, mc };
+    return { acc, AL, gw, gh, g: gc, mc };
   }
 
   /* ---- arrows: a loose grid in soft patches, each along the flow (the same at any frame) -------- */
@@ -478,7 +482,7 @@
   })();
 
   // Draw one stroke (a capsule from (x0, y0) to (x1, y1), radius rad px) into the image, antialiased.
-  function stroke(d8, W, H, x0, y0, x1, y1, rad, col) {
+  function stroke(d8, W, H, x0, y0, x1, y1, rad, col, see = false) { // see: over see-through pixels (Transparent)
     const xa = Math.max(0, Math.floor(Math.min(x0, x1) - rad - 1)), xb = Math.min(W - 1, Math.ceil(Math.max(x0, x1) + rad + 1));
     const ya = Math.max(0, Math.floor(Math.min(y0, y1) - rad - 1)), yb = Math.min(H - 1, Math.ceil(Math.max(y0, y1) + rad + 1));
     const dx = x1 - x0, dy = y1 - y0, ll = dx * dx + dy * dy || 1;
@@ -492,6 +496,12 @@
         const cov = rad + 0.5 - Math.sqrt(ex * ex + ey * ey);
         if (cov <= 0) continue;
         const a = cov >= 1 ? 1 : cov, o = (y * W + x) * 4;
+        if (see) {
+          const A = d8[o + 3] / 255, oa = a + A * (1 - a), k = A * (1 - a);
+          d8[o] = (col[0] * a + d8[o] * k) / oa; d8[o + 1] = (col[1] * a + d8[o + 1] * k) / oa; d8[o + 2] = (col[2] * a + d8[o + 2] * k) / oa;
+          d8[o + 3] = oa * 255;
+          continue;
+        }
         d8[o] += (col[0] - d8[o]) * a; d8[o + 1] += (col[1] - d8[o + 1]) * a; d8[o + 2] += (col[2] - d8[o + 2]) * a;
       }
     }
@@ -500,10 +510,10 @@
   /* ---- paint ------------------------------------------------------------------------------- */
   let pvImg = null;
   // map (General's Rotation and Size): the canvas (cw x ch) and the part of the world it shows
-  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map }) {
+  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map, transparent = false }) {
     const amount = anim ? Math.max(0, anim.amount) : 0;
     const rgb = colors.map(PL.color.hexToRgb);
-    const { acc, gw, g, mc } = glow(seed | 0, p, W, H, t, amount, rgb, map);
+    const { acc, AL, gw, g, mc } = glow(seed | 0, p, W, H, t, amount, rgb, map, transparent);
     const CW = map ? map.cw : W, CH = map ? map.ch : H, ms = map ? map.s : 1, mx = map ? map.x0 : 0, my = map ? map.y0 : 0;
     if (preview) { if (!pvImg || pvImg.width !== CW || pvImg.height !== CH) pvImg = ctx.createImageData(CW, CH); }
     const img = preview ? pvImg : ctx.createImageData(CW, CH);
@@ -516,11 +526,14 @@
       let o = y * CW * 4;
       for (let x = 0; x < CW; x++, o += 4) {
         const a = r0 + IX[x], b = r1 + IX[x], tx = TX[x];
+        let al = 1;
+        if (AL) { const pa = a / 3, pb = b / 3, top = AL[pa] + (AL[pa + 1] - AL[pa]) * tx, bot = AL[pb] + (AL[pb + 1] - AL[pb]) * tx; al = top + (bot - top) * ty; }
+        const ia = AL ? (al > 1e-4 ? 1 / al : 0) : 1;
         for (let c = 0; c < 3; c++) {
           const top = acc[a + c] + (acc[a + 3 + c] - acc[a + c]) * tx, bot = acc[b + c] + (acc[b + 3 + c] - acc[b + c]) * tx;
-          d8[o + c] = top + (bot - top) * ty;
+          d8[o + c] = (top + (bot - top) * ty) * ia;
         }
-        d8[o + 3] = 255;
+        d8[o + 3] = al * 255;
       }
     }
     // arrows, in the core's colour, over everything (on the canvas: sizes in its pixels)
@@ -532,10 +545,10 @@
         const x = map ? (x0 - mx) / ms : x0, y = map ? (y0 - my) / ms : y0;
         const c = Math.cos(a), s = Math.sin(a);
         const tx = x + 0.5 * L * c, ty = y + 0.5 * L * s, bx = x - 0.5 * L * c, by = y - 0.5 * L * s;
-        stroke(d8, CW, CH, bx, by, tx, ty, rad, col);
+        stroke(d8, CW, CH, bx, by, tx, ty, rad, col, transparent);
         for (const sg of [-1, 1]) {
           const b2 = a + Math.PI - sg * K.headA;
-          stroke(d8, CW, CH, tx, ty, tx + hl * Math.cos(b2), ty + hl * Math.sin(b2), rad, col);
+          stroke(d8, CW, CH, tx, ty, tx + hl * Math.cos(b2), ty + hl * Math.sin(b2), rad, col, transparent);
         }
       }
     }
@@ -547,11 +560,10 @@
   PL.tools.register({
     id: 'crowd',
     name: 'Crowd',
-    kind: 'Backgrounds',
+    kind: 'Organic',
     tagline: 'Blurred crowd',
     about: 'A crowd seen through a heat camera: soft red figures, each wrapped in a green glow with a darker rim, laid one over another, under a field of small arrows that follow the flow. In the animation every figure drifts round its own small loop.',
     raster: true,
-    opaque: true,      // the ground is part of the picture
     stillGrain: true,  // the grain holds still while the figures drift
     inks: {
       min: 3, max: 8, roles, fit, spec, add, generate,

@@ -250,7 +250,7 @@
   PL.tools.register({
     id: 'warp',
     name: 'Warp',
-    kind: 'Backgrounds',
+    kind: 'Pop art',
     tagline: 'Op-art pattern',
     about: 'Checkerboards and slashed stripes in a bright ink on black, bent by waves, a taper or a pinch. In the animation the warp breathes: the pattern bends further, eases back and bends again.',
     inks: {

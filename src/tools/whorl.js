@@ -484,7 +484,7 @@
   PL.tools.register({
     id: 'whorl',
     name: 'Whorl',
-    kind: 'Backgrounds',
+    kind: 'Pop art',
     tagline: 'Warped op-art',
     about: 'Stripes bend around invisible centres into rings, eyes and saddles, then a smooth, turbulent or rippled warp bends them further. Flat color, crisp vector edges.',
     inks: {

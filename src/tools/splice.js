@@ -422,7 +422,7 @@
   // map (General's Rotation and Size): the canvas (cw x ch) and the part of the world it shows (its pixel
   // (x, y) shows the world at (mx + x ms, my + y ms), frame px). The pieces, screens, outlines and arcs are
   // the world's; the mottle stays one cell per canvas pixel or so.
-  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map }) {
+  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map, transparent = false }) {
     const L = Math.max(W, H), aw = W / L, ah = H / L;
     const cw = map ? map.cw : W, ch = map ? map.ch : H, mx = map ? map.x0 : 0, my = map ? map.y0 : 0, ms = map ? map.s : 1;
     const n = colors.length;
@@ -570,7 +570,7 @@
             if (q < 0) q = 0; else if (q > S1) q = S1;
             ink = ramp[q];
           }
-          buf[row + x] = LUTg[(ink << 5) + GR[gy | gX[gx0 + x]]];
+          buf[row + x] = transparent && ink === 0 ? 0 : LUTg[(ink << 5) + GR[gy | gX[gx0 + x]]]; // Transparent: the Key ink left out
         }
       }
     }
@@ -597,7 +597,7 @@
   PL.tools.register({
     id: 'splice',
     name: 'Splice',
-    kind: 'Backgrounds',
+    kind: 'Halftone',
     tagline: 'Cut-up riso',
     about: 'One field of soft hills, cut into pieces that each print it in their own screen and inks: dots, lines, pixels or flat, with contour outlines, thin arcs and riso grain.',
     raster: true,

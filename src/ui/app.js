@@ -59,6 +59,7 @@ PL.app = (() => {
     x: '<path d="M4.6 4.6l6.8 6.8M11.4 4.6l-6.8 6.8" stroke-width="1.8"/>',
     plus: '<path d="M8 3v10M3 8h10"/>',
     search: '<circle cx="7" cy="7" r="4.3"/><path d="M10.2 10.2 13.4 13.4"/>',
+    tiles: '<rect x="2.5" y="2.5" width="4.5" height="4.5" rx="1.2"/><rect x="9" y="2.5" width="4.5" height="4.5" rx="1.2"/><rect x="2.5" y="9" width="4.5" height="4.5" rx="1.2"/><rect x="9" y="9" width="4.5" height="4.5" rx="1.2"/>',
     moon: '<path d="M13.3 9.7A5.6 5.6 0 0 1 6.3 2.7a5.6 5.6 0 1 0 7 7z"/>',
     sun: '<circle cx="8" cy="8" r="2.9"/><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"/>',
   };
@@ -111,22 +112,80 @@ PL.app = (() => {
   const firstSeed = (id) => FIRST_SEEDS[id] || 1; // the seed of each tool's default look
 
   /* -------------------------------------------------------------- user data */
-  let userData = { palettes: [], kept: [], states: {} };
+  // Your palettes, kept variations and each style's last settings. They're saved in this browser on this device
+  // as you go (localStorage, one key each), so they're still here the next time the app opens; they don't
+  // follow you to other devices. A copy made with Save app copy carries them in its #pl-user-data block:
+  // opening one adds what it holds, once per copy, so things you've deleted since don't come back.
+  const MAX_PALETTES = 5;
+  const MAX_KEPT = 60;
+  const STORE = 'pattern-studio:'; // + palettes, kept, states, copies (the saved copies already added)
+  const store = (() => {
+    try { localStorage.setItem(STORE + 'test', '1'); localStorage.removeItem(STORE + 'test'); return localStorage; }
+    catch (e) { return null; } // storage blocked: it works as before, with Save app copy
+  })();
+  function readStore(key) {
+    try { return store ? JSON.parse(store.getItem(STORE + key) || 'null') : null; } catch (e) { return null; }
+  }
+  function writeStore(key, value) {
+    if (!store) return false;
+    try { store.setItem(STORE + key, JSON.stringify(value)); return true; }
+    catch (e) { console.warn('Could not save to this browser', e); return false; } // full
+  }
+  function textHash(t) { // names a saved copy's data
+    let x = 0x811c9dc5;
+    for (let i = 0; i < t.length; i++) { x ^= t.charCodeAt(i); x = Math.imul(x, 0x01000193); }
+    return (x >>> 0).toString(36) + '.' + t.length.toString(36);
+  }
+  const goodPalettes = (list) => (Array.isArray(list) ? list : [])
+    .map((p) => p && Array.isArray(p.colors) && { name: String(p.name || 'My palette').slice(0, 40), colors: p.colors.map(PL.color.normHex).filter(Boolean) })
+    .filter((p) => p && p.colors.length);
+  const goodKept = (list) => (Array.isArray(list) ? list : [])
+    .filter((k) => k && k.state && PL.tools.get(k.state.tool) && typeof k.thumb === 'string' && k.thumb.startsWith('data:image/'));
+
+  const userData = { palettes: goodPalettes(readStore('palettes')), kept: goodKept(readStore('kept')), states: {} };
+  const savedStates = readStore('states');
+  if (savedStates && typeof savedStates === 'object') userData.states = savedStates;
   try {
     const raw = ($('#pl-user-data').textContent || '').trim();
-    if (raw && raw !== '{}') {
+    const id = raw && raw !== '{}' && textHash(raw);
+    const added = readStore('copies') || [];
+    if (id && !added.includes(id)) {
       const d = JSON.parse(raw);
-      userData.palettes = Array.isArray(d.palettes) ? d.palettes : [];
-      userData.kept = Array.isArray(d.kept) ? d.kept : [];
-      userData.states = d.states && typeof d.states === 'object' ? d.states : {};
+      const havePal = new Set(userData.palettes.map((p) => p.colors.join()));
+      for (const p of goodPalettes(d.palettes)) {
+        if (havePal.has(p.colors.join()) || userData.palettes.length >= MAX_PALETTES) continue;
+        userData.palettes.push(p);
+        havePal.add(p.colors.join());
+      }
+      const haveKept = new Set(userData.kept.map((k) => JSON.stringify(k.state)));
+      for (const k of goodKept(d.kept)) if (!haveKept.has(JSON.stringify(k.state))) userData.kept.push(k);
+      userData.kept.sort((a, b) => (b.at || 0) - (a.at || 0)).splice(MAX_KEPT);
+      if (d.states && typeof d.states === 'object') Object.assign(userData.states, d.states); // the copy you opened
+      const saved = [writeStore('palettes', userData.palettes), writeStore('kept', userData.kept), writeStore('states', userData.states)];
+      if (saved.every(Boolean)) writeStore('copies', [id, ...added].slice(0, 20));
     }
   } catch (e) {
     console.warn('Could not read saved library', e);
   }
+
+  // Palettes and kept variations save the moment they change (each style's settings: see saveStates). If this
+  // browser won't save them, it's the old way: a dot on Save app copy and a warning before you leave. Returns
+  // false when the browser saves but has run out of room, so the message about what changed can say so.
   let libraryDirty = false;
-  const markDirty = () => { libraryDirty = true; updateLibraryBadge(); };
+  const NO_ROOM = 'this browser has no room left to save it. Use Save app copy to keep it';
+  function markDirty() {
+    if (writeStore('palettes', userData.palettes) && writeStore('kept', userData.kept)) return true;
+    libraryDirty = true;
+    updateLibraryBadge();
+    return !store;
+  }
   window.addEventListener('beforeunload', (e) => {
     if (libraryDirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+  // The app open in two tabs: what one keeps or saves shows in the other (and isn't written over)
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORE + 'palettes') { userData.palettes = goodPalettes(readStore('palettes')); renderPalettes(); }
+    else if (e.key === STORE + 'kept') { userData.kept = goodKept(readStore('kept')); renderKept(); }
   });
 
   /* ------------------------------------------------------------------ state */
@@ -237,6 +296,22 @@ PL.app = (() => {
     S = states[tool.id];
   }
 
+  // Each style's settings, saved on this device a moment after every edit (and as the page closes): only the
+  // styles that aren't on their default look, and which style was open last.
+  const DEFAULT_JSON = Object.fromEntries(TOOLS.map((tl) => [tl.id, JSON.stringify(defaultState(tl, firstSeed(tl.id)))]));
+  let statesTimer = 0;
+  function saveStates() {
+    clearTimeout(statesTimer);
+    statesTimer = 0;
+    if (!store) return;
+    const st = { __last: tool.id };
+    for (const tl of TOOLS) if (JSON.stringify(states[tl.id]) !== DEFAULT_JSON[tl.id]) st[tl.id] = states[tl.id];
+    writeStore('states', st);
+  }
+  const saveStatesSoon = () => { if (store && !statesTimer) statesTimer = setTimeout(saveStates, 400); };
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveStates(); });
+  window.addEventListener('pagehide', saveStates);
+
   function commit() {
     const H = hist[tool.id];
     const snap = JSON.stringify(S);
@@ -246,6 +321,7 @@ PL.app = (() => {
     if (H.list.length > 200) H.list.shift();
     H.idx = H.list.length - 1;
     updateHistoryButtons();
+    saveStatesSoon();
   }
   function stepHistory(dir) { goHistory(hist[tool.id].idx + dir); }
   // Jump to one step of this style's history (← and → step one at a time; the dots under the artboard jump).
@@ -323,14 +399,21 @@ PL.app = (() => {
     return [W, H];
   }
 
+  // Pixel render: the picture drawn on a small canvas, one pixel per Pixel-size cell of the frame (pixelGrid), then
+  // every pixel snapped to the nearest palette colour and the grid scaled up to the frame without smoothing
+  // (snapAndScale). Vector styles draw their shapes onto the grid (drawPixelated); pixel styles paint it
+  // (paintPixelated).
   let pixCanvas = null;
-  function drawPixelated(ctx, scene, W, H, st, unit, transparent, view) {
+  function pixelGrid(W, H, st, unit) {
     const px = Math.max(2, Math.round((st.fx.ditherPx || 2) * unit));
     const sw = Math.ceil(W / px), sh = Math.ceil(H / px);
     if (!pixCanvas) pixCanvas = document.createElement('canvas');
-    pixCanvas.width = sw;
+    pixCanvas.width = sw; // (also clears it)
     pixCanvas.height = sh;
-    const pc = pixCanvas.getContext('2d', { willReadFrequently: true });
+    return { px, sw, sh, pc: pixCanvas.getContext('2d', { willReadFrequently: true }) };
+  }
+  function drawPixelated(ctx, scene, W, H, st, unit, transparent, view) {
+    const grid = pixelGrid(W, H, st, unit), { px, sw, sh, pc } = grid;
     if (view) { // General: the ground over everything, then the shapes turned and zoomed (the pixels stay square to the frame)
       if (!transparent && scene.bg) { pc.fillStyle = scene.bg; pc.fillRect(0, 0, sw, sh); }
       pc.save();
@@ -338,9 +421,19 @@ PL.app = (() => {
       PL.render.drawScene(pc, scene, { transparent, ground: false });
       pc.restore();
     } else PL.render.drawScene(pc, scene, { transparent, scale: 1 / px });
-    // Snap every pixel to the nearest palette colour: crisp, palette-exact pixel art.
     // Translucent layers (shadows, overprints) are shading, not inks: snap to the solid inks only.
     const pal = [scene.bg, ...scene.layers.filter((l) => l.opacity == null || l.opacity >= 1).flatMap((l) => (l.grad ? l.grad.stops : [l.fill]))].filter(Boolean).map(PL.color.hexToRgb);
+    snapAndScale(ctx, W, H, grid, pal, transparent);
+  }
+  // A pixel style: painted straight onto the grid (each cell one pixel), snapped to its palette
+  function paintPixelated(ctx, W, H, st, unit, transparent, view, paintTo) {
+    const grid = pixelGrid(W, H, st, unit), { sw, sh, pc } = grid;
+    const info = view ? paintView(pc, sw, sh, view, (c, map) => paintTo(c, map, sw, sh)) : paintTo(pc, undefined, sw, sh);
+    snapAndScale(ctx, W, H, grid, st.colors.map(PL.color.hexToRgb), transparent);
+    return info;
+  }
+  // Snap every pixel to the nearest palette colour (crisp, palette-exact pixel art), then scale the grid up
+  function snapAndScale(ctx, W, H, { px, sw, sh, pc }, pal, transparent) {
     const img = pc.getImageData(0, 0, sw, sh);
     const d = img.data;
     const memo = new Map();
@@ -380,9 +473,10 @@ PL.app = (() => {
   // region: the part of the world to cover (General's Rotation and Size; none: the frame)
   function buildScene(tl, st, W, H, f, frames, useCache, preview, aspect, region) {
     const refL = Math.max(...exportDims(st.output));
-    const make = () => tl.build({ W, H, aspect, seed: st.seed, p: st.params, colors: st.colors, t: f / frames, anim: st.anim, crisp: !preview, refL, region });
+    const transparent = !!st.output.transparent;
+    const make = () => tl.build({ W, H, aspect, seed: st.seed, p: st.params, colors: st.colors, t: f / frames, anim: st.anim, crisp: !preview, refL, region, transparent });
     if (!useCache || tl.recolorable === false) return make();
-    const key = JSON.stringify([st.tool, st.seed, st.params, st.anim.amount, frames, W, H, aspect, st.colors.length, !!preview, refL, region || 0]);
+    const key = JSON.stringify([st.tool, st.seed, st.params, st.anim.amount, frames, W, H, aspect, st.colors.length, !!preview, refL, region || 0, transparent]);
     if (key !== sceneCache.key) { sceneCache.key = key; sceneCache.frames.clear(); }
     let scene = sceneCache.frames.get(f);
     if (scene) return PL.render.recolor(scene, st.colors);
@@ -480,14 +574,17 @@ PL.app = (() => {
     const aspect = opts.aspect || frameAspect(st.output, W, H);
     // the picture: a pixel style paints its canvas (map: the part of the world it shows, for General's
     // Rotation and Size); a vector style builds its shapes over the region of the world the frame shows
-    const paintTo = (c, map) => {
+    const paintTo = (c, map, Wp = W, Hp = H) => { // (Wp x Hp: the Pixel render's small grid)
       const refL = opts.preview ? Math.max(...exportDims(st.output)) : 0;
-      const r = tl.paint({ ctx: c, W, H, aspect, seed: st.seed, p: st.params, colors: st.colors, t: f / frames, anim: st.anim, frame: f, transparent, preview: !!opts.preview, refL, map });
+      const r = tl.paint({ ctx: c, W: Wp, H: Hp, aspect, seed: st.seed, p: st.params, colors: st.colors, t: f / frames, anim: st.anim, frame: f, transparent, preview: !!opts.preview, refL, map });
       return { count: (r && (r.count != null ? r.count : r.dots)) || 0, label: (r && r.label) || 'dots', text: r && r.status };
     };
     const view = viewOf(st);
     let info;
-    if (tl.paint) info = view ? paintView(ctx, W, H, view, paintTo) : paintTo(ctx, undefined);
+    if (tl.paint) {
+      if (st.output.render === 'pixel') info = paintPixelated(ctx, W, H, st, unit, transparent, view, paintTo);
+      else info = view ? paintView(ctx, W, H, view, paintTo) : paintTo(ctx, undefined);
+    }
     else {
       const scene = buildScene(tl, st, W, H, f, frames, !!opts.cache, !!opts.preview, aspect, view ? viewBox(W, H, view) : undefined);
       if (st.output.render === 'pixel') drawPixelated(ctx, scene, W, H, st, unit, transparent, view);
@@ -500,7 +597,7 @@ PL.app = (() => {
     // frame's short side (Pixel size 2 = 2 px when it is 713 px); on a Pixel render
     // they are its pixels, so the two grids line up.
     if (opts.fx !== false && PL.fx.isActive(st.fx)) {
-      const cell = !tl.paint && st.output.render === 'pixel' ? Math.max(2, Math.round((st.fx.ditherPx || 2) * unit)) : PL.fx.ditherCell(st.fx, W, H);
+      const cell = st.output.render === 'pixel' ? Math.max(2, Math.round((st.fx.ditherPx || 2) * unit)) : PL.fx.ditherCell(st.fx, W, H);
       PL.fx.apply(ctx, W, H, st.fx, { unit, cell, frame: tl.stillGrain ? 0 : f, seed: st.seed, colors: st.colors });
     }
     return info;
@@ -753,10 +850,10 @@ PL.app = (() => {
   function keep() {
     const st = deep(S);
     userData.kept.unshift({ state: st, thumb: thumbOf(st), at: Date.now() });
-    if (userData.kept.length > 60) userData.kept.pop();
-    markDirty();
+    if (userData.kept.length > MAX_KEPT) userData.kept.pop();
+    const saved = markDirty();
     renderKept();
-    toast('Kept — find it in the strip below');
+    toast(saved ? 'Kept — find it in the strip below' : `Kept, but ${NO_ROOM}`, saved ? undefined : 'err');
   }
   function renderKept() {
     const strip = $('#kept');
@@ -842,7 +939,7 @@ PL.app = (() => {
       return { svg: `${svgOpen(W, H, title)}\n<image width="${W}" height="${H}" xlink:href="${url}"/>\n</svg>\n`, W, H };
     }
     const v = viewOf(st);
-    const scene = tl.build({ W, H, aspect: frameAspect(st.output, W, H), seed: st.seed, p: st.params, colors: st.colors, t: (frameIdx % frames) / frames, anim: st.anim, region: v ? viewBox(W, H, v) : undefined });
+    const scene = tl.build({ W, H, aspect: frameAspect(st.output, W, H), seed: st.seed, p: st.params, colors: st.colors, t: (frameIdx % frames) / frames, anim: st.anim, region: v ? viewBox(W, H, v) : undefined, transparent: !!st.output.transparent });
     if (!v) return { svg: PL.render.sceneToSVG(scene, { transparent: st.output.transparent, title }), W, H };
     return { svg: `${svgOpen(W, H, title)}\n${viewSVGBody(scene, W, H, v, st.output.transparent)}\n</svg>\n`, W, H };
   }
@@ -963,7 +1060,7 @@ PL.app = (() => {
           inner = `<image width="${W}" height="${H}" xlink:href="${await blobToDataURL(blob)}"/>`;
         } else {
           const v = viewOf(st);
-          const scene = tl.build({ W, H, aspect: frameAspect(st.output, W, H), seed: st.seed, p: st.params, colors: st.colors, t: f / N, anim: st.anim, region: v ? viewBox(W, H, v) : undefined });
+          const scene = tl.build({ W, H, aspect: frameAspect(st.output, W, H), seed: st.seed, p: st.params, colors: st.colors, t: f / N, anim: st.anim, region: v ? viewBox(W, H, v) : undefined, transparent: !!st.output.transparent });
           const P = `f${f + 1}-`; // every frame's own ids
           inner = (v ? viewSVGBody(scene, W, H, v, st.output.transparent) : svgParts(PL.render.sceneToSVG(scene, { transparent: st.output.transparent })).inner)
             .replace(/ id="/g, ` id="${P}`).replace(/href="#/g, `href="#${P}`).replace(/url\(#/g, `url(#${P}`);
@@ -1241,11 +1338,12 @@ PL.app = (() => {
       userData.kept.push({ state: st, thumb: typeof k.thumb === 'string' && k.thumb.startsWith('data:image/') ? k.thumb : thumbOf(st), at: k.at || Date.now() });
       nk++;
     }
-    if (np || nk) markDirty();
+    const saved = np || nk ? markDirty() : true;
     renderPalettes();
     renderKept();
     toast((np || nk ? `Added ${np} palette${np === 1 ? '' : 's'} and ${nk} kept variation${nk === 1 ? '' : 's'}` : 'Those palettes and kept variations are already here')
-      + (full ? ` (${full} more palette${full === 1 ? '' : 's'} didn’t fit: you can keep ${MAX_PALETTES})` : ''));
+      + (full ? ` (${full} more palette${full === 1 ? '' : 's'} didn’t fit: you can keep ${MAX_PALETTES})` : '')
+      + (saved ? '' : `, but ${NO_ROOM.replace('save it', 'save them').replace('keep it', 'keep them')}`), saved ? undefined : 'err');
   }
   function saveAppCopy() {
     const st = {};
@@ -1535,9 +1633,8 @@ PL.app = (() => {
     return btn;
   }
 
-  // My palettes: up to 5, kept for the whole app, so every style shows the same ones (Save app copy keeps
-  // them for next time). Click one to use it; × deletes it.
-  const MAX_PALETTES = 5;
+  // My palettes: up to 5 (MAX_PALETTES), kept for the whole app, so every style shows the same ones (saved on
+  // this device; Save app copy carries them to another). Click one to use it; × deletes it.
   function renderPalettes() {
     if (!paletteWrap) return;
     const mine = userData.palettes;
@@ -1570,9 +1667,9 @@ PL.app = (() => {
       const nm = (name.value || '').trim() || 'My palette ' + (userData.palettes.length + 1);
       userData.palettes.unshift({ name: nm.slice(0, 40), colors: S.colors.slice() });
       name.value = '';
-      markDirty();
+      const saved = markDirty();
       renderPalettes();
-      toast(`Saved “${nm}” to My palettes (${userData.palettes.length} of ${MAX_PALETTES}), in every style`);
+      toast(saved ? `Saved “${nm}” to My palettes (${userData.palettes.length} of ${MAX_PALETTES}), in every style` : `Added “${nm}” to My palettes, but ${NO_ROOM}`, saved ? undefined : 'err');
     };
     name.addEventListener('keydown', (e) => { if (e.key === 'Enter') savePal(); });
 
@@ -1626,7 +1723,7 @@ PL.app = (() => {
       group('ditherOn', 'dither', PL.fx.DITHER_KEYS, [
         toggleRow({ label: 'Dither', cls: 'fx-head', hint: 'Dither on / off', get: () => fx().ditherOn, set: (v) => (fx().ditherOn = v), onChange: syncControls }),
         selectRow({ label: 'Pattern', aria: 'Dither pattern', hint: 'Bayer: an even, ordered dot pattern (8 the finest, 2 the coarsest); Noise: dots at random', options: PL.fx.PATTERNS, get: () => fx().ditherPattern, set: (v) => (fx().ditherPattern = v), onChange: dither }),
-        rangeRow({ label: 'Pixel size', min: 1, max: 10, step: 1, unit: 'px', def: fxDef('ditherPx'), hint: tool.paint ? 'Size of the dither dots' : 'Size of the dither dots (and of the pixels of a Pixel render)', get: () => fx().ditherPx, set: (v) => (fx().ditherPx = v), onInput: dither }),
+        rangeRow({ label: 'Pixel size', min: 1, max: 10, step: 1, unit: 'px', def: fxDef('ditherPx'), hint: 'Size of the dither dots (and of the pixels of a Pixel render)', get: () => fx().ditherPx, set: (v) => (fx().ditherPx = v), onInput: dither }),
         rangeRow({ label: 'Tone', min: 0, max: 8, step: 1, def: fxDef('tones'), hint: 'How many colors the dither prints with: 0 = your darkest and lightest color, 1 = only your colors, 2–8 = levels of red, green and blue', get: () => fx().tones, set: (v) => (fx().tones = v), onInput: dither }),
         rangeRow({ label: 'Amount', aria: 'Dither amount', min: 0, max: 100, step: 1, unit: '%', def: fxDef('ditherAmt'), hint: 'How much of the dithered picture shows over the original', get: () => fx().ditherAmt, set: (v) => (fx().ditherAmt = v), onInput: dither }),
       ]),
@@ -1714,9 +1811,9 @@ PL.app = (() => {
       }),
       sizeRow,
       custom,
-      tool.paint ? null : segRow({ label: 'Render', options: [{ value: 'smooth', label: 'Smooth' }, { value: 'pixel', label: 'Pixel' }], get: () => o().render, set: (v) => (o().render = v) }),
-      tool.opaque ? null : toggleRow({ label: 'Transparent', hint: 'Export without the background color', get: () => o().transparent, set: (v) => (o().transparent = v) }),
-      tool.paint ? null : h('p', { class: 'note' }, h('b', null, 'Pixel'), ' snaps the art to a grid (Pixel size in Effects) using only your palette colors.'),
+      segRow({ label: 'Render', options: [{ value: 'smooth', label: 'Smooth' }, { value: 'pixel', label: 'Pixel' }], get: () => o().render, set: (v) => (o().render = v) }),
+      toggleRow({ label: 'Transparent', hint: 'Export without the background color (the first color of the palette)', get: () => o().transparent, set: (v) => (o().transparent = v) }),
+      h('p', { class: 'note' }, h('b', null, 'Pixel'), ' snaps the art to a grid (Pixel size in Effects) using only your palette colors.'),
     ]);
     syncCustom();
     return out;
@@ -1756,7 +1853,9 @@ PL.app = (() => {
         h('button', { class: 'btn', type: 'button', onclick: () => file.click(), title: 'Open a pattern you saved' }, icon('upload'), 'Upload pattern')
       ),
       h('p', { class: 'note' }, 'Save pattern downloads this pattern’s colors and settings as a small file. Upload pattern opens it again any time, on any computer.'),
-      h('p', { class: 'note' }, 'Your palettes and kept variations live in this window. To keep them for next time, save a copy of the app with them built in, then replace your old file.'),
+      h('p', { class: 'note' }, store
+        ? 'Your palettes, kept variations and settings are saved in this browser on this device, so they’re here next time. To use them on another computer, save a copy of the app with them built in.'
+        : 'Your palettes and kept variations live in this window. To keep them for next time, save a copy of the app with them built in, then replace your old file.'),
       h('button', { class: 'btn primary', type: 'button', onclick: saveAppCopy }, icon('file'), 'Save app copy', h('span', { id: 'libBadge', title: 'Unsaved changes', style: 'display:none;width:7px;height:7px;border-radius:50%;background:#111;margin-left:2px' })),
       file,
     ], false);
@@ -1821,10 +1920,6 @@ PL.app = (() => {
     bindings = [];
     const panel = $('#panel');
     panel.replaceChildren(
-      h('div', { class: 'panel-head' },
-        h('b', null, 'Settings'),
-        h('button', { class: 'btn ghost', type: 'button', onclick: restoreDefault, title: 'Default: back to this style\'s original look — colors, settings and seed (D)' }, icon('reset'), 'Default', h('kbd', null, 'D'))
-      ),
       h('p', { class: 'note about' }, h('b', null, tool.name + ' — '), tool.about),
       ...toolSections(),
       generalSection(),
@@ -1932,19 +2027,21 @@ PL.app = (() => {
   }
 
   /* ------------------------------------------------------------ style menu */
-  // The style switcher at the top of the settings: previous, every style by name, next ([ and ] do the same).
+  // The style switcher at the top of the settings: every style by name ([ and ] step to the previous / next one).
   let styleSel = null;
-  function stepTool(d) { go(TOOLS[(TOOLS.indexOf(tool) + d + TOOLS.length) % TOOLS.length].id); }
   function buildStylePick() {
     const el = $('#stylePick');
     if (!el) return;
     styleSel = h('select', { class: 'sel', 'aria-label': 'Pattern style', title: 'Pattern style ([ and ] step through them)' },
       TOOLS.map((t, i) => h('option', { value: t.id }, `${String(i + 1).padStart(2, '0')}  ${t.name}`)));
     styleSel.addEventListener('change', () => { styleSel.blur(); go(styleSel.value); });
-    el.replaceChildren(
-      h('button', { class: 'btn icon ghost', type: 'button', title: 'Previous style ([)', 'aria-label': 'Previous style', onclick: () => stepTool(-1) }, icon('back')),
-      styleSel,
-      h('button', { class: 'btn icon ghost', type: 'button', title: 'Next style (])', 'aria-label': 'Next style', onclick: () => stepTool(1) }, icon('fwd')));
+    el.replaceChildren(styleSel);
+    // Default, the last of Home and Dark mode, right above the menu: this style back to its original look
+    const def = $('#defaultBtn');
+    if (def && !def.firstChild) {
+      def.append(icon('reset'), h('span', { class: 'text' }, 'Default'));
+      def.addEventListener('click', restoreDefault);
+    }
   }
 
   /* ------------------------------------------------------------ routing
@@ -2138,6 +2235,13 @@ PL.app = (() => {
   };
   let homeOrder = 'old';
 
+  // Categories. Each style's category is its kind, in its file in src/tools (shown on its card and at the top of
+  // its page); this is the menu's order. The menu by the search shows one category at a time; like the order, the
+  // choice holds while you move between Home and the styles.
+  const CATEGORIES = ['Gradients', 'Halftone', 'Organic', 'Pixel & glyphs', 'Pop art'];
+  for (const t of TOOLS) if (!CATEGORIES.includes(t.kind)) CATEGORIES.push(t.kind); // a new one still shows
+  let homeCategory = '';
+
   // Phones and tablets can't hover (or point precisely): there the cards on screen play on their own (moveCards),
   // at their default settings (Strand at Intensity 2.00, say), as under the pointer on a computer, and the Play
   // previews button is hidden (styles.css).
@@ -2166,12 +2270,12 @@ PL.app = (() => {
       const q = search.value.trim().toLowerCase();
       let shown = 0;
       for (const c of cards) {
-        const hit = !q || c.t.name.toLowerCase().includes(q);
+        const hit = (!q || c.t.name.toLowerCase().includes(q)) && (!homeCategory || c.t.kind === homeCategory);
         c.card.hidden = !hit;
         if (hit) shown++;
       }
       none.hidden = shown > 0;
-      none.textContent = shown ? '' : `No pattern style called “${search.value.trim()}”.`;
+      none.textContent = shown ? '' : `No pattern style called “${search.value.trim()}”${homeCategory ? ` in ${homeCategory}` : ''}.`;
     };
     search.addEventListener('input', filter);
     search.addEventListener('keydown', (e) => {
@@ -2183,25 +2287,36 @@ PL.app = (() => {
       ORDERS.map(([value, label]) => h('option', { value }, label)));
     order.value = homeOrder;
     order.addEventListener('change', () => { homeOrder = order.value; grid.replaceChildren(...ordered().map((c) => c.card)); });
+    const category = h('select', { class: 'home-order', 'aria-label': 'Category of the styles', title: 'Show one category of styles' },
+      h('option', { value: '' }, 'All categories'),
+      CATEGORIES.map((name) => h('option', { value: name }, name)));
+    category.value = homeCategory;
+    category.addEventListener('change', () => { homeCategory = category.value; filter(); });
     $('#home').replaceChildren(
       h('header', { class: 'home-head' },
         h('div', { class: 'home-intro' },
-          h('h1', null, 'Pattern Studio'),
+          // the title with "Generative Tool" beside it, and GitHub and Contact at the right end of its row
+          h('div', { class: 'home-title' },
+            h('h1', null, 'Pattern Studio ', h('span', null, 'Generative Tool')),
+            h('nav', { class: 'home-links', 'aria-label': 'Links' }, footLink('GitHub', LINKS.github), footLink('Contact', LINKS.contact))
+          ),
           h('p', null, 'Generative pattern tool with over 20 different fully customizable designs to choose from. Create backgrounds for social media posts, websites, presentations or anything else you like, then export them as images, SVGs or seamless video loops. Pick a style to start. Works offline in your browser.')
         ),
-        // one row: the search and the dark / light switch; the style count, Play previews and the order menu
+        // the style count; under it the search and the dark / light switch, then the category and order menus and
+        // Play previews (at the right of the search's row, or on a row of their own under it when there's no room)
         h('div', { class: 'home-bar' },
+          h('div', { class: 'home-status' },
+            h('div', { class: 'home-meta' }, h('i'), `${TOOLS.length} ${TOOLS.length === 1 ? 'style' : 'styles'} · available`)
+          ),
           h('div', { class: 'home-tools' }, h('label', { class: 'home-search' }, icon('search'), search), themeButton()),
-          h('div', { class: 'home-side' },
-            h('div', { class: 'home-meta' }, h('i'), `${TOOLS.length} ${TOOLS.length === 1 ? 'style' : 'styles'} · available`),
-            h('div', { class: 'home-view' }, previewsButton(), h('label', { class: 'home-sort' }, icon('sort'), order))
-          )
+          h('div', { class: 'home-view' }, h('label', { class: 'home-sort' }, icon('tiles'), category), h('label', { class: 'home-sort' }, icon('sort'), order), previewsButton())
         )
       ),
       grid,
       none,
-      h('nav', { class: 'home-foot', 'aria-label': 'Links' }, footLink('GitHub', LINKS.github), h('span', { class: 'dot', 'aria-hidden': 'true' }), footLink('Contact', LINKS.contact))
+      h('p', { class: 'home-note' }, 'This tool works offline in your browser. None of your information is stored.')
     );
+    if (homeCategory) filter();
     requestAnimationFrame(alignKept);
     // Draw after layout so each preview matches its card size; hover plays the loop.
     // Cards always show each style's default look, whatever has been edited since.
@@ -2226,11 +2341,11 @@ PL.app = (() => {
     });
   }
 
-  // The links under the last row of cards. Fill these in: a web address (or mailto: for Contact).
-  // While one is empty its link says it's coming soon instead of going anywhere.
+  // GitHub and Contact, at the right of the home title. Fill these in: a web address (or mailto: for Contact).
+  // While one is empty its button says it's coming soon instead of going anywhere.
   const LINKS = { github: '', contact: '' };
   function footLink(label, url) {
-    const a = h('a', url ? { href: url, target: '_blank', rel: 'noopener noreferrer' } : { href: '#', 'data-soon': '' }, label);
+    const a = h('a', url ? { class: 'home-link', href: url, target: '_blank', rel: 'noopener noreferrer' } : { class: 'home-link', href: '#', 'data-soon': '' }, label);
     if (!url) a.addEventListener('click', (e) => { e.preventDefault(); toast(`The ${label} link is coming soon`); });
     return a;
   }
@@ -2248,10 +2363,11 @@ PL.app = (() => {
   }
   new ResizeObserver(onceNextFrame(alignKept)).observe(document.querySelector('#home'));
 
-  // Dark or light: the app always opens dark (nothing remembers it). Two switches, always in step: the
-  // round one by the home search, and the one next to Home at the top of a style's settings (named there;
-  // just its icon on a phone). Each shows a moon in dark mode and a sun in light mode; a click switches.
-  let theme = 'dark';
+  // Dark or light: it opens light from 8 am to 5 pm on this device's clock (its time zone) and dark the rest of
+  // the day; index.html sets that before the page draws. Two switches, always in step, change it for this
+  // visit (nothing remembers it): the round one by the home search, and the one next to Home at the top of a
+  // style's settings (named there; just its icon on a phone). Each shows a moon in dark mode and a sun in light.
+  let theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
   function setTheme(t) {
     theme = t === 'light' ? 'light' : 'dark';
     if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
@@ -2276,7 +2392,7 @@ PL.app = (() => {
   showTheme($('#themeNav'));
 
   function showToolHeader() {
-    $('#toolName').replaceChildren(tool.name, h('small', null, tool.kind.toUpperCase()));
+    $('#toolName').replaceChildren(tool.name, h('small', null, tool.kind));
     $('#toolAbout').textContent = tool.tagline;
     $('#toolAbout').title = tool.about;
     document.title = `${tool.name} — Pattern Studio`;
@@ -2308,7 +2424,6 @@ PL.app = (() => {
       h('div', { class: 'foot' }, h('button', { class: 'btn', type: 'button', onclick: modal.close }, 'Close')),
     ]);
   }
-  $('#helpBtn').addEventListener('click', showHelp);
 
   document.addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;

@@ -398,7 +398,7 @@
   PL.tools.register({
     id: 'stipple',
     name: 'Stipple',
-    kind: 'Backgrounds',
+    kind: 'Halftone',
     tagline: 'Halftone dots',
     about: 'Dot fields read from a noise field: halftone lattices and contour scatters that gather along the color-band edges, with a few accent dots. The edges drift in the animation, so dots blink on and off along them.',
     inks: {

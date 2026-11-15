@@ -303,7 +303,7 @@
   PL.tools.register({
     id: 'cipher',
     name: 'Cipher',
-    kind: 'Backgrounds',
+    kind: 'Pixel & glyphs',
     tagline: 'Glyph rivers',
     about: 'A river of glyphs on a dark grid: solid squares down the middle, diamonds, x’s and ringed squares toward the edges, each band in its own ink, with stray flecks and scanline smears.',
     inks: {

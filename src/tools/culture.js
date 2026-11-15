@@ -514,7 +514,7 @@
   PL.tools.register({
     id: 'culture',
     name: 'Culture',
-    kind: 'Backgrounds',
+    kind: 'Organic',
     tagline: 'Grainy colony fields',
     about: 'Soft cells that fuse where they meet, banded into rings of your inks around a solid core, and buried in film grain or print stipple.',
     raster: true,

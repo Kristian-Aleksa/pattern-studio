@@ -344,7 +344,7 @@
   // reads the world at its middle, the field's grid as fine on the canvas as at 100 % (so zoomed in it is
   // read again at full detail), evened out as the frame's own samples are.
   let pvImg = null;
-  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map }) {
+  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map, transparent = false }) {
     const amount = anim ? Math.max(0, anim.amount) : 0;
     const N = clamp(Math.round(p.steps), 2, 24);
     const d = clamp01(p.drag / 100), tr = clamp01(p.tear / 100);
@@ -431,7 +431,7 @@
         if (G) q += G[grow + ((x + gox) & 511)] * ga;
         let L = Math.floor(q);
         if (L < 0) L = 0; else if (L >= N) L = N - 1;
-        d8[o] = lr[L]; d8[o + 1] = lg[L]; d8[o + 2] = lb[L]; d8[o + 3] = 255;
+        d8[o] = lr[L]; d8[o + 1] = lg[L]; d8[o + 2] = lb[L]; d8[o + 3] = transparent && L === 0 ? 0 : 255; // Transparent: the Cold band left out
       }
     }
     ctx.putImageData(img, 0, 0);
@@ -442,11 +442,10 @@
   PL.tools.register({
     id: 'sear',
     name: 'Sear',
-    kind: 'Backgrounds',
+    kind: 'Gradients',
     tagline: 'Thermal smear',
     about: 'A heat map: a smooth noise field cut into flat bands from cold to hot, read in upright columns or smeared and torn sideways, with a fine grain on the band edges. In the animation the field sways up and back as it slowly changes.',
     raster: true,
-    opaque: true, // no background colour to leave out
     inks: {
       min: 2, max: 10, roles, fit, spec, add, generate,
       span: (n) => n, // Invert runs the ramp the other way

@@ -166,7 +166,7 @@
   PL.tools.register({
     id: 'rise',
     name: 'Rise',
-    kind: 'Backgrounds',
+    kind: 'Pop art',
     tagline: 'Stripe arcs',
     about: 'Vertical stripes with nested arcs rising from an edge or the centre; inside each arc the stripe and ground colors trade places. In the animation the arcs swell and settle in a smooth wave that rises out from the anchor.',
     inks: {

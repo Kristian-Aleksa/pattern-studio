@@ -169,7 +169,7 @@
   /* ---- the field on a grid: each sample's mixed colour (sRGB 0..255) --------------------------- */
   // M (General's Rotation and Size): the canvas (cw x ch) and the part of the world it shows; the grid is
   // as fine on the canvas as at 100 %, so zoomed in the clouds are read again at full detail.
-  function field(seed, p, W, H, t, amount, labs, M) {
+  function field(seed, p, W, H, t, amount, labs, M, transparent) {
     const n = labs.length, S0 = Math.min(W, H), g = S0 / K.grid;
     const cw = M ? M.cw : W, ch = M ? M.ch : H, mx = M ? M.x0 : 0, my = M ? M.y0 : 0, ms = M ? M.s : 1;
     const gw = Math.ceil(cw / g) + 2, gh = Math.ceil(ch / g) + 2;
@@ -190,6 +190,7 @@
     for (let o = 0; o < K.oct; o++) amp[o] /= norm;
     const mf = K.mesh[0], wF = K.warpF;
     const out = new Float32Array(gw * gh * 3), f = new Float64Array(n);
+    const AL = transparent ? new Float32Array(gw * gh) : null; // Transparent: how much of each point isn't the first ink
     const sweepW = 1 / (K.sweep[2] * K.sweep[2]);
     for (let j = 0; j < gh; j++) {
       const v0 = ((my + j * g * ms - H / 2) / S0) * zoom;
@@ -223,26 +224,33 @@
           f[k] = fk; if (fk > fmax) fmax = fk;
         }
         // a soft mix of the inks (softmax), blended in OKLab
-        let ws = 0, L = 0, A = 0, B = 0;
-        for (let k = 0; k < n; k++) { const w = Math.exp(kmix * (f[k] - fmax)); ws += w; L += w * labs[k][0]; A += w * labs[k][1]; B += w * labs[k][2]; }
-        L /= ws; A /= ws; B /= ws;
+        let ws = 0, L = 0, A = 0, B = 0, w0 = 0;
+        for (let k = 0; k < n; k++) {
+          const w = Math.exp(kmix * (f[k] - fmax));
+          ws += w;
+          if (AL && k === 0) { w0 = w; continue; } // Transparent: the first ink's share is left out, as see-through
+          L += w * labs[k][0]; A += w * labs[k][1]; B += w * labs[k][2];
+        }
+        const wi = ws - w0, al = AL ? wi / ws : 1;
+        if (wi > 1e-12) { L /= wi; A /= wi; B /= wi; } else { L = labs[1][0]; A = labs[1][1]; B = labs[1][2]; }
+        if (AL) AL[j * gw + i] = al;
         const l_ = L + 0.3963377774 * A + 0.2158037573 * B, m_ = L - 0.1055613458 * A - 0.0638541728 * B, s_ = L - 0.0894841775 * A - 1.291485548 * B;
         const l3 = l_ * l_ * l_, m3 = m_ * m_ * m_, s3 = s_ * s_ * s_;
         const o3 = 3 * (j * gw + i);
-        out[o3] = toS(4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3);
-        out[o3 + 1] = toS(-1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3);
-        out[o3 + 2] = toS(-0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3);
+        out[o3] = al * toS(4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3); // (with Transparent, premultiplied)
+        out[o3 + 1] = al * toS(-1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3);
+        out[o3 + 2] = al * toS(-0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3);
       }
     }
-    return { out, gw, gh, g, style: pl.style };
+    return { out, AL, gw, gh, g, style: pl.style };
   }
 
   /* ---- paint ------------------------------------------------------------------------------- */
   let pvImg = null;
-  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map }) {
+  function paint({ ctx, W, H, seed, p, colors, t = 0, anim, preview = false, map, transparent = false }) {
     const amount = anim ? Math.max(0, anim.amount) : 0;
     const labs = colors.map((c) => rgbToLab(PL.color.hexToRgb(c)));
-    const { out, gw, g, style } = field(seed | 0, p, W, H, t, amount, labs, map);
+    const { out, AL, gw, g, style } = field(seed | 0, p, W, H, t, amount, labs, map, transparent);
     const cw = map ? map.cw : W, ch = map ? map.ch : H; // the canvas (with map: the part of the world it shows)
     if (preview) { if (!pvImg || pvImg.width !== cw || pvImg.height !== ch) pvImg = ctx.createImageData(cw, ch); }
     const img = preview ? pvImg : ctx.createImageData(cw, ch);
@@ -254,11 +262,14 @@
       let o = y * cw * 4;
       for (let x = 0; x < cw; x++, o += 4) {
         const a = r0 + IX[x], b = r1 + IX[x], tx = TX[x];
+        let al = 1;
+        if (AL) { const pa = a / 3, pb = b / 3, top = AL[pa] + (AL[pa + 1] - AL[pa]) * tx, bot = AL[pb] + (AL[pb + 1] - AL[pb]) * tx; al = top + (bot - top) * ty; }
+        const ia = al > 1e-4 ? 1 / al : 0;
         for (let c = 0; c < 3; c++) {
           const top = out[a + c] + (out[a + 3 + c] - out[a + c]) * tx, bot = out[b + c] + (out[b + 3 + c] - out[b + c]) * tx;
-          d8[o + c] = top + (bot - top) * ty;
+          d8[o + c] = (top + (bot - top) * ty) * ia;
         }
-        d8[o + 3] = 255;
+        d8[o + 3] = al * 255;
       }
     }
     ctx.putImageData(img, 0, 0);
@@ -269,12 +280,11 @@
   PL.tools.register({
     id: 'aura',
     name: 'Aura',
-    kind: 'Backgrounds',
+    kind: 'Gradients',
     tagline: 'Soft gradient',
     about: 'A soft gradient: every ink drifts in its own cloudy field and the inks blend where they meet, as turbulent clouds, broad patches or a sweep across the frame, printed with a fine color dither. In the animation the clouds roll round a small circle and slowly change shape.',
     raster: true,
     colorDither: true,   // opens with the color dither on (kept in looks saved before every style had it)
-    opaque: true,        // no background to leave out
     inks: {
       min: 2, max: 8, roles, fit, spec, add, generate,
       span: (n) => n, // Invert reverses the inks
