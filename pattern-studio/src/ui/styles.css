@@ -1,0 +1,1010 @@
+/* ==========================================================================
+   Pattern Studio — UI styles. Every bit of interface text is Aeonik (ui/fonts.css, embedded,
+   so it looks right offline); the patterns draw their own type.
+   A Figma-style interface: Figma's neutral greys and blue accent, 11px
+   interface text, filled 24–28px controls and sentence-case section titles.
+   ========================================================================== */
+:root {
+  /* dark (the app opens dark), after Figma's dark editor */
+  --bg: #1e1e1e;                 /* the canvas, and the page behind everything */
+  --side: #2c2c2c;               /* the top of the settings column */
+  --panel: #2c2c2c;              /* side panels, cards, the toolbar */
+  --raise: #383838;              /* inputs, hover, segmented-control tracks */
+  --raise-2: #444444;            /* hover on filled controls */
+  --line: #3d3d3d;               /* dividers */
+  --line-2: #4d4d4d;             /* control outlines, slider tracks */
+  --text: #ffffff;
+  --muted: #b3b3b3;
+  --faint: #999999;              /* small grey text: 4.9:1 on the panels */
+  --accent: #0d99ff;             /* Figma blue: primary buttons, sliders, switches (and the browser tab's little ball) */
+  --accent-hover: #0c8ce9;
+  --accent-ink: #ffffff;
+  --mark: #0d99ff;               /* focus rings, the dot showing, accent text */
+  --mark-soft: rgba(13, 153, 255, 0.4);
+  --mark-wash: rgba(13, 153, 255, 0.12);
+  --selected-bg: rgba(13, 153, 255, 0.2);   /* the current item in a list (Home on the home page), a toggled button */
+  --accent-text: #7cc4ff;        /* blue text: tags, a pressed button (5.7:1 on --selected-bg) */
+  --danger: #f24822;
+  --range-fill: #0d99ff;
+  --glass: rgba(44, 44, 44, 0.94);
+  --ring: rgba(255, 255, 255, 0.08);
+  --edge: rgba(255, 255, 255, 0.16);
+  --edge-soft: rgba(255, 255, 255, 0.08);
+  --grid-dot: transparent;       /* a plain canvas, like Figma's */
+  --check-a: #383838;
+  --check-b: #2c2c2c;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --shadow-strong: rgba(0, 0, 0, 0.55);
+  --shadow-soft: rgba(0, 0, 0, 0.35);
+  --toast-bg: #383838;
+  --toast-ink: #ffffff;
+  --tag-bg: rgba(255, 255, 255, 0.08);   /* small tags: a style's kind */
+  --seg-track: #383838;          /* segmented control: the track */
+  --seg-on: #4d4d4d;             /* segmented control: the selected option */
+  /* corner radius */
+  --r-xs: 3px;      /* tags, badges, kbd */
+  --r-sm: 4px;      /* segments, kept thumbnails */
+  --r: 5px;         /* buttons, inputs, selects, list rows */
+  --r-md: 6px;      /* home cards and home buttons */
+  --r-lg: 8px;      /* cards, toolbar tools */
+  --r-xl: 13px;     /* the toolbar, the modal */
+  --r-pill: 999px;  /* switches, slider tracks */
+  /* type: Figma's sizes plus about 1px, because Aeonik's lowercase is ~7% shorter than Inter's at the same size */
+  --fs-2xs: 11px;      /* tags, shortcut keys, number badges, swatch labels */
+  --fs-label: 12px;    /* section titles, captions */
+  --fs-xs: 12px;       /* notes, values, meta */
+  --fs-sm: 12px;       /* row labels, buttons */
+  --fs-md: 13px;       /* body, inputs, search */
+  --fs-lg: 14px;       /* the app name, card titles, the modal title */
+  --fs-xl: 15px;       /* the style page title */
+  --fs-subhead: 16px;  /* the home page's subheading */
+  --fs-display: 44px;  /* the home page's title */
+  /* spacing: 4px steps */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-12: 48px;
+  /* elevation, built from the theme's shadow colours so it follows dark / light */
+  --shadow-1: 0 1px 2px var(--shadow-soft);
+  --shadow-bar: 0 2px 10px var(--shadow-soft);
+  --shadow-hover: 0 8px 24px -12px var(--shadow-strong);
+  --shadow-pop: 0 12px 32px -8px var(--shadow);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --sans: "Aeonik", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* Aeonik from ui/fonts.css; the rest only for a character it lacks */
+  color-scheme: dark;
+}
+/* Light mode, after Figma's light editor (the sun / moon switches in the sidebar and by the home search; the app always opens dark) */
+:root[data-theme="light"] {
+  --bg: #f5f5f5;
+  --side: #ffffff;
+  --panel: #ffffff;
+  --raise: #f5f5f5;
+  --raise-2: #ebebeb;
+  --line: #e6e6e6;
+  --line-2: #d9d9d9;
+  --text: #1e1e1e;
+  --muted: #5a5a5a;
+  --faint: #707070;              /* small grey text: 5:1 on white */
+  --accent: #0d99ff;
+  --accent-hover: #0c8ce9;
+  --accent-ink: #ffffff;
+  --mark: #0d99ff;
+  --mark-soft: rgba(13, 153, 255, 0.35);
+  --mark-wash: rgba(13, 153, 255, 0.08);
+  --selected-bg: #e5f4ff;
+  --accent-text: #0068c2;        /* 5.1:1 on --selected-bg */
+  --danger: #f24822;
+  --range-fill: #0d99ff;
+  --glass: rgba(255, 255, 255, 0.94);
+  --ring: rgba(0, 0, 0, 0.06);
+  --edge: rgba(0, 0, 0, 0.14);
+  --edge-soft: rgba(0, 0, 0, 0.08);
+  --grid-dot: transparent;
+  --check-a: #e6e6e6;
+  --check-b: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.16);
+  --shadow-strong: rgba(0, 0, 0, 0.18);
+  --shadow-soft: rgba(0, 0, 0, 0.1);
+  --toast-bg: #1e1e1e;
+  --toast-ink: #ffffff;
+  --tag-bg: rgba(0, 0, 0, 0.05);
+  --seg-track: #f5f5f5;
+  --seg-on: #ffffff;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: var(--fs-md)/1.45 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px; }
+kbd {
+  font: 500 var(--fs-2xs)/1 var(--sans);
+  padding: 2px 4px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-xs);
+  color: var(--muted);
+  background: transparent;
+}
+
+/* ---------- layout: settings | artboard | output ---------- */
+.app {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 280px; /* settings | artboard | output */
+  height: 100vh;
+}
+.sidebar {
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  min-width: 0;
+  min-height: 0;
+}
+.panel {
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+}
+.panel::-webkit-scrollbar, .kept-strip::-webkit-scrollbar { width: 8px; height: 8px; }
+.panel::-webkit-scrollbar-thumb, .kept-strip::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+
+/* ---------- left column: the name, Home, dark / light and the style menu, then the settings ---------- */
+.side-top { flex: none; padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line); background: var(--side); }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--sp-4) var(--sp-4) var(--sp-3);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  font-size: var(--fs-lg);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+a.brand { color: inherit; text-decoration: none; border-radius: var(--r); }
+a.brand:hover small { color: var(--muted); }
+/* "Generative Tool" beside the name, as on the home page: smaller, in half the name's color (on the narrowest phones
+   it goes under the name; see the 480px query) */
+.brand small { font-size: var(--fs-2xs); font-weight: inherit; opacity: 0.5; }
+.side-nav { display: flex; gap: 2px; padding: 0 var(--sp-2) var(--sp-2); } /* Home, then the dark / light switch */
+.nav-item {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 32px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r);
+  border: 0;
+  color: var(--text);
+  text-decoration: none;
+  font-size: var(--fs-md);
+  transition: background 0.12s, color 0.12s;
+}
+.nav-item svg { width: 16px; height: 16px; flex: none; color: var(--muted); }
+.nav-item:hover { background: var(--raise); color: var(--text); }
+.nav-item[aria-current="true"] { background: var(--selected-bg); color: var(--text); }
+button.nav-item { background: none; text-align: left; }
+.style-pick { padding: 0 var(--sp-2); }
+.style-pick select.sel { width: 100%; font-weight: 600; }
+.sidebar .panel { flex: 1; border-left: 0; background: none; }
+
+/* ---------- right column: what comes out (a summary, Frame, Export), the shortcuts and the library ---------- */
+.outputs { background: var(--panel); border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+.outputs .panel { flex: 1; border-left: 0; }
+/* the output column's labels are short (Ratio, Size, Render, Loops), so its menus get the room */
+.outputs .row { grid-template-columns: 56px minmax(0, 1fr) 40px; }
+.outputs .row.wide { grid-template-columns: 56px minmax(0, 1fr); }
+.outputs .row.wide:has(> .switch) { grid-template-columns: minmax(0, 1fr) auto; } /* Transparent: the label, its switch at the end */
+.out-summary { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-2) var(--sp-3); margin: 0; padding: var(--sp-3) var(--sp-4) var(--sp-4); border-bottom: 1px solid var(--line); font: var(--fs-xs)/1.3 var(--sans); font-variant-numeric: tabular-nums; }
+.out-summary dt { color: var(--muted); }
+.out-summary dd { margin: 0; color: var(--text); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.panel .keys { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-2) var(--sp-3); align-items: start; font-size: var(--fs-sm); color: var(--muted); }
+.panel .keys kbd { justify-self: start; font-size: var(--fs-2xs); padding: 3px 6px; }
+.side-foot {
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font-size: var(--fs-xs);
+  display: grid;
+  gap: var(--sp-2);
+}
+.side-foot .offline { display: flex; align-items: center; gap: 7px; }
+.side-foot .offline i { width: 6px; height: 6px; border-radius: 50%; background: #14ae5c; box-shadow: 0 0 0 3px rgba(20, 174, 92, 0.18); }
+.outputs .side-foot { flex: none; }
+
+/* ---------- top bar: the title on the canvas, the actions in a floating toolbar ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  min-width: 0;
+  background: var(--bg);
+}
+.title { min-width: 0; flex: 1; }
+.title h1 { margin: 0; font-size: var(--fs-xl); font-weight: 600; letter-spacing: -0.005em; display: flex; align-items: baseline; gap: var(--sp-2); white-space: nowrap; overflow: hidden; }
+.title h1 small { font: 500 var(--fs-xs) var(--sans); color: var(--accent-text); background: var(--selected-bg); border-radius: var(--r-xs); padding: 1px 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; } /* the style's category, as on its home card */
+.title p { margin: 2px 0 0; color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: nowrap;
+  padding: 4px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-bar);
+}
+.sep { width: 1px; height: 20px; background: var(--line); margin: 0 4px; }
+
+/* ---------- buttons: Figma's outlined secondary and blue primary ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--r);
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.btn:hover { background: var(--raise); }
+.btn:active { transform: translateY(0.5px); }
+.btn[disabled] { opacity: 0.4; pointer-events: none; }
+.btn kbd { margin-left: 1px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 600; }
+.btn.primary:hover { background: var(--accent-hover); }
+.btn.primary kbd { color: rgba(255, 255, 255, 0.85); background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.3); }
+.btn.icon { width: 28px; padding: 0; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+.btn.ghost:hover { background: var(--raise); color: var(--text); }
+.btn.on { background: var(--selected-bg); border-color: transparent; color: var(--mark); }
+.btn svg { width: 14px; height: 14px; flex: none; }
+.btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn-row .btn { flex: 1; padding: 0 8px; }
+/* the toolbar's tools: borderless 32px buttons; the primary one is blue, like Figma's active tool */
+.actions .btn { height: 32px; border-color: transparent; border-radius: var(--r-lg); }
+.actions .btn:not(.icon) { padding: 0 10px; }
+.actions .btn.icon { width: 32px; }
+
+.seed {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
+  background: var(--raise);
+  padding-left: 10px;
+  font: var(--fs-sm) var(--sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+  transition: border-color 0.12s;
+}
+.seed:hover { border-color: var(--line-2); }
+.seed:focus-within { border-color: var(--accent); }
+.seed input {
+  width: 60px;
+  border: 0;
+  background: transparent;
+  font: var(--fs-sm) var(--sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  padding: 0 10px 0 var(--sp-1);
+  height: 100%;
+  outline: none;
+}
+
+/* ---------- stage ---------- */
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column; /* the artboard, the generation dots under it (30 px: GENS_H in app.js) */
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 1px 1px, var(--grid-dot) 1px, transparent 1.5px) 0 0 / 18px 18px,
+    var(--bg);
+}
+.frame {
+  position: relative;
+  box-shadow: 0 0 0 1px var(--ring), 0 8px 24px -10px var(--shadow);
+  line-height: 0;
+}
+.frame.transparent {
+  background: repeating-conic-gradient(var(--check-a) 0% 25%, var(--check-b) 0% 50%) 0 0 / 16px 16px;
+}
+.frame canvas { display: block; cursor: pointer; }
+.frame.tiled canvas { visibility: hidden; }
+.busy-dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.busy .busy-dot { opacity: 0.9; }
+/* Generations: a dot per step of the history (← →), the one showing filled; a click jumps to it */
+.gens {
+  flex: none;
+  height: 26px;
+  margin-top: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+.gens button {
+  pointer-events: auto;
+  width: 18px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  background: none;
+  display: grid;
+  place-items: center;
+}
+.gens i { display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--line-2); transition: background 0.15s, transform 0.15s; }
+.gens button:hover i { background: var(--muted); }
+.gens button[aria-current="true"] i { background: var(--mark); transform: scale(1.35); }
+.gens button.more i { transform: scale(0.6); }
+.gens button:focus-visible { outline: none; }
+.gens button:focus-visible i { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--mark); }
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
+  font: var(--fs-xs) var(--sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+  min-width: 0;
+  flex-wrap: wrap;
+  background: var(--bg);
+}
+.statusbar #status { min-width: 0; } /* a narrow middle: the line wraps onto a second line rather than being cut */
+
+/* ---------- kept strip: a docked panel under the canvas ---------- */
+.kept {
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  padding: var(--sp-3) var(--sp-4);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-4);
+  align-items: center;
+}
+.app.is-home .kept { padding-left: max(40px, calc((100% - 1180px) / 2)); padding-right: max(40px, calc((100% - 1180px) / 2)); }
+.kept-label { font: 600 var(--fs-xs)/1.3 var(--sans); color: var(--text); }
+.kept-label b { display: block; color: var(--muted); font-weight: 400; font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.kept-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; min-height: 58px; align-items: center; }
+.kept-empty { color: var(--faint); font-size: var(--fs-sm); }
+.kept-item { position: relative; flex: none; }
+.kept-item button.thumb {
+  display: block;
+  padding: 0;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--raise);
+  line-height: 0;
+}
+.kept-item button.thumb:hover { border-color: var(--mark); }
+.kept-item img { height: 54px; width: auto; display: block; }
+.kept-item .x {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: var(--raise-2);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  line-height: 16px;
+  padding: 0;
+  display: none;
+}
+.kept-item:hover .x { display: block; }
+
+/* ---------- control panel: Figma-style sections, captions and filled fields ---------- */
+.panel-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-2);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+/* "Output" reads like Figma's selected Design tab */
+.panel-head b { font: 600 var(--fs-sm)/16px var(--sans); color: var(--text); background: var(--raise); border-radius: var(--r); padding: 4px 8px; }
+.note.about { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--line); margin: 0; }
+.note.about b { color: var(--text); font-weight: 600; }
+.sec { border-bottom: 1px solid var(--line); }
+.sec-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4) var(--sp-2);
+  background: none;
+  border: 0;
+  font: 600 var(--fs-label)/16px var(--sans);
+  color: var(--text);
+  text-align: left;
+}
+.sec-head:hover { color: var(--text); }
+.sec-head:hover svg { opacity: 1; }
+.sec-head svg { width: 12px; height: 12px; transition: transform 0.15s, opacity 0.12s; opacity: 0.6; color: var(--muted); }
+.sec.closed .sec-head { padding-bottom: var(--sp-3); }
+.sec.closed .sec-head svg { transform: rotate(-90deg); }
+.sec-body { padding: 0 var(--sp-4) var(--sp-3); display: grid; gap: var(--sp-2); }
+.sec.closed .sec-body { display: none; }
+/* Library closed with unsaved palettes or kept variations: Save app copy's dot shows by its name */
+.sec.unsaved.closed .sec-head > span:first-child::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: var(--accent); vertical-align: 1px; }
+.sub { font: var(--fs-xs) var(--sans); color: var(--muted); margin-top: var(--sp-1); display: flex; align-items: center; justify-content: space-between; }
+
+.row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) 54px;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 24px;
+}
+.row > label { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; user-select: none; }
+.row > label:hover { color: var(--text); }
+.row .val {
+  width: 100%;
+  height: 24px;
+  border: 1px solid transparent;
+  border-radius: var(--r);
+  background: var(--raise);
+  text-align: left;
+  font: var(--fs-xs) var(--sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  padding: 0 6px;
+  transition: border-color 0.12s;
+}
+.row .val:hover { border-color: var(--line-2); }
+.row .val:focus { border-color: var(--accent); outline: none; background: var(--raise); }
+.row.wide { grid-template-columns: 92px minmax(0, 1fr); }
+/* a segmented control in the settings: its label above it and the panel's whole width (like Figma's "Alignment"),
+   so three or four options always fit */
+#panel .row.wide:has(> .seg) { grid-template-columns: minmax(0, 1fr); row-gap: 6px; }
+
+/* sliders: a blue fill on a thin track, a white knob (Figma's opacity slider) */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  margin: 0;
+  --p: 50%;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(to right, var(--range-fill) var(--p), var(--line-2) var(--p));
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 0;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: box-shadow 0.12s;
+}
+input[type="range"]:hover::-webkit-slider-thumb { box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.35), 0 0 0 4px var(--mark-wash); }
+input[type="range"]:focus-visible { outline: none; }
+input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 0 0 4px var(--mark-soft); }
+input[type="range"]::-moz-range-track { height: 4px; border-radius: var(--r-pill); background: var(--line-2); }
+input[type="range"]::-moz-range-progress { height: 4px; border-radius: var(--r-pill); background: var(--range-fill); }
+input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #ffffff; border: 0; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.35); }
+input[type="range"]:hover::-moz-range-thumb { box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.35), 0 0 0 4px var(--mark-wash); }
+
+/* segmented controls: a grey track, the selected option lifted */
+.seg {
+  display: flex;
+  background: var(--seg-track);
+  border: 0;
+  border-radius: var(--r);
+  padding: 2px;
+  gap: 2px;
+}
+.seg button {
+  flex: 1;
+  height: 24px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  padding: 0 6px;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s;
+}
+.seg button:hover { color: var(--text); }
+.seg button[aria-pressed="true"] { background: var(--seg-on); color: var(--text); box-shadow: var(--shadow-1), 0 0 0 1px var(--edge-soft); }
+.seg.multi button { font-size: var(--fs-md); padding: 0 2px; }
+.seg.multi button[aria-pressed="false"] { opacity: 0.55; }
+
+.switch {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  border-radius: var(--r-pill);
+  border: 0;
+  background: var(--line-2);
+  padding: 0;
+  transition: background 0.15s;
+  justify-self: end;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: var(--shadow-1);
+  transition: transform 0.15s;
+}
+.switch[aria-checked="true"] { background: var(--accent); }
+.switch[aria-checked="true"]::after { transform: translateX(12px); background: #ffffff; }
+
+/* fields and menus: filled, no outline until hover; blue when focused */
+select.sel, input.txt {
+  width: 100%;
+  height: 28px;
+  border-radius: var(--r);
+  border: 1px solid transparent;
+  background-color: var(--raise);
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-sm);
+  transition: border-color 0.12s;
+}
+select.sel {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M.6.6 4 4 7.4.6' fill='none' stroke='%23999' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+}
+select.sel:hover, input.txt:hover { border-color: var(--line-2); }
+select.sel:focus, input.txt:focus { border-color: var(--accent); outline: none; }
+.dims { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--sp-2); align-items: center; color: var(--faint); font: var(--fs-xs) var(--sans); }
+.dims input { text-align: center; font-variant-numeric: tabular-nums; color: var(--text); }
+.note { color: var(--faint); font-size: var(--fs-xs); line-height: 1.45; margin: 0; }
+.note b { color: var(--muted); font-weight: 600; }
+
+/* ---------- effects: Dither and Grain, each a switch, its settings, a description and Reset ---------- */
+.fx-group { display: grid; gap: var(--sp-2); }
+.fx-group + .fx-group { border-top: 1px solid var(--line); padding-top: var(--sp-3); }
+.row.fx-head > label { color: var(--text); font-weight: 600; }
+.fx-group > :not(.fx-head) { transition: opacity 0.15s; }
+.fx-group.off > :not(.fx-head) { opacity: 0.45; }
+.fx-group.off > :not(.fx-head):hover, .fx-group.off > :not(.fx-head):focus-within { opacity: 0.8; }
+.btn-row .btn.fx-reset { flex: 0 0 auto; height: 24px; padding: 0 var(--sp-2); font-size: var(--fs-sm); }
+
+/* ---------- colors ---------- */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: var(--sp-3) var(--sp-2); } /* 4 across in the side panel, more on a phone: room for names like Background */
+.sw { display: grid; gap: 4px; justify-items: center; position: relative; min-width: 0; }
+.sw .card { position: relative; width: 100%; aspect-ratio: 1; }
+.sw .chip {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r);
+  box-shadow: inset 0 0 0 1px var(--edge);
+  cursor: pointer;
+  overflow: hidden;
+  display: block;
+}
+.sw .chip input[type="color"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; border: 0; padding: 0; }
+.sw.drag-over .chip { outline: 2px dashed var(--mark); outline-offset: 2px; }
+.sw .role { font-size: var(--fs-2xs); color: var(--faint); white-space: nowrap; max-width: calc(100% + var(--sp-2)); overflow: hidden; text-overflow: ellipsis; } /* may use half of each gap */
+.sw .hex {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  font: var(--fs-2xs) var(--sans);
+  color: var(--muted);
+  padding: 0;
+  text-transform: uppercase;
+}
+.sw .hex:focus { color: var(--text); outline: 1px solid var(--mark); border-radius: var(--r-xs); }
+/* lock: top-left, shows on hover (always when locked) */
+.sw .lock, .sw .del {
+  position: absolute;
+  top: 4px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  z-index: 2;
+  transition: opacity 0.12s, background 0.12s;
+}
+.sw .lock { left: 4px; border-radius: var(--r-sm); background: rgba(0, 0, 0, 0.45); opacity: 0; }
+.sw .lock svg { width: 10px; height: 10px; }
+.sw:hover .lock, .sw .lock:focus-visible, .sw .lock[aria-pressed="true"] { opacity: 1; }
+.sw .lock[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+/* remove: the × in the top-right corner of every card */
+.sw .del { right: 4px; border-radius: 50%; background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25); opacity: 0.85; }
+.sw .del svg { width: 10px; height: 10px; }
+.sw:hover .del { opacity: 1; }
+.sw .del:hover { background: var(--danger); box-shadow: none; }
+/* add card */
+.sw .add-card {
+  width: 100%;
+  height: 100%;
+  border: 1px dashed var(--line-2);
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.sw .add-card:hover { border-color: var(--mark); color: var(--mark); background: var(--mark-wash); }
+.sw .add-card svg { width: 16px; height: 16px; }
+
+/* palettes: list rows, like Figma's colour styles */
+.palettes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); }
+.pal {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--r);
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  transition: background 0.12s, border-color 0.12s;
+}
+.pal:hover { border-color: var(--line); background: var(--raise); }
+.pal .bar { display: flex; height: 16px; border-radius: var(--r-xs); overflow: hidden; box-shadow: inset 0 0 0 1px var(--edge-soft); }
+.pal .bar i { flex: 1; }
+.pal span { font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pal .del {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: var(--raise-2);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  line-height: 15px;
+  padding: 0;
+  display: none;
+}
+.pal:hover .del { display: block; }
+@media (hover: none) { .pal .del { display: block; } }
+.paste { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-2); }
+
+/* ---------- overlays ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translate(-50%, 16px);
+  opacity: 0;
+  pointer-events: none;
+  background: var(--toast-bg);
+  color: var(--toast-ink);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-lg);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  box-shadow: var(--shadow-pop);
+  transition: opacity 0.18s, transform 0.18s;
+  z-index: 50;
+  max-width: calc(100vw - 32px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.err { background: var(--danger); color: #fff; }
+
+.modal-wrap {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  display: none;
+  place-items: center;
+  z-index: 40;
+  padding: 16px;
+}
+.modal-wrap.show { display: grid; }
+.modal {
+  width: min(460px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  padding: var(--sp-5);
+  box-shadow: var(--shadow-pop);
+}
+.modal h2 { margin: 0 0 var(--sp-3); font-size: var(--fs-lg); font-weight: 600; }
+.modal .keys { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-2) var(--sp-4); font-size: var(--fs-sm); color: var(--muted); }
+.modal .keys kbd { justify-self: start; align-self: start; font-size: var(--fs-2xs); padding: 3px 6px; } /* one line tall, even by a description that wraps */
+.progress { height: 4px; border-radius: var(--r-pill); background: var(--line-2); overflow: hidden; margin: var(--sp-4) 0 var(--sp-3); }
+.progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.1s linear; }
+.modal .foot { display: flex; justify-content: flex-end; gap: var(--sp-2); margin-top: var(--sp-4); }
+
+/* ---------- home: Figma's file browser ---------- */
+.home { display: none; overflow-y: auto; padding: var(--sp-8) 40px 40px; min-height: 0; overscroll-behavior: contain; background: var(--panel); }
+.home::-webkit-scrollbar { width: 8px; }
+.home::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+/* Home: no settings or output (they're for one style), the cards across the whole width */
+.app.is-home { grid-template-columns: minmax(0, 1fr); }
+.app.is-home .sidebar, .app.is-home .panel, .app.is-home .outputs, .app.is-home .topbar, .app.is-home .stage, .app.is-home .statusbar { display: none; }
+.app.is-home .main { grid-template-rows: minmax(0, 1fr) auto; }
+.app.is-home .home { display: block; }
+@media (min-width: 861px) {
+  .side-nav { flex-direction: column; } /* a style's sidebar: Home and dark / light as list rows */
+  .side-nav .nav-item { flex: none; }    /* full 32px rows (flex: 1 would shrink them to their text in a column) */
+}
+/* The top section: a large title and subheading over the search row (positioned, so a background animation
+   can fill it later). */
+.home-head { position: relative; margin: 0 auto var(--sp-8); max-width: 1180px; padding-top: var(--sp-8); }
+/* The title row: Pattern Studio with "Generative Tool" beside it (half its size, half its color), and GitHub and
+   Contact at the right end; on a phone they go above it (see the 600px query) */
+.home-title { --title-fs: var(--fs-display); --link-fs: var(--fs-md); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-4); margin: 0 0 var(--sp-5); }
+.home-head h1 { font-size: var(--title-fs); line-height: 1.1; letter-spacing: 0; margin: 0; font-weight: 500; min-width: 0; } /* Aeonik's own spacing: tighter makes the tt in Pattern touch */
+.home-head h1 span { font-size: 0.5em; opacity: 0.5; white-space: nowrap; }
+/* GitHub and Contact sit on the title's visual middle. Boxes centred on each other aren't enough: Aeonik's letters sit
+   low in their box, and lower the bigger the type (with the lowercase carrying the weight, about 0.09em for the title
+   and 0.084em for the links, measured from the drawn letters), so the links come down by the difference. */
+.home-links { display: flex; gap: var(--sp-1); margin-left: auto; margin-right: calc(-1 * var(--sp-3)); transform: translateY(calc(var(--title-fs) * 0.09 - var(--link-fs) * 0.084)); } /* the words line up with the right edge */
+.home-link { height: 32px; padding: 0 var(--sp-3); border-radius: var(--r-md); border: 0; background: none; color: var(--text); display: inline-flex; align-items: center; font-size: var(--link-fs); font-weight: 500; text-decoration: none; white-space: nowrap; transition: background 0.12s; }
+.home-link:hover { background: var(--raise); }
+.home-link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.home-head p { color: var(--muted); max-width: 680px; margin: 0; font-size: var(--fs-subhead); line-height: 1.5; text-wrap: pretty; } /* no single word left on the last line */
+.home-intro { min-width: 0; }
+/* Under the intro: the style count at the left; under it one row, like the filter row on Figma's Community page: the
+   search and the dark / light switch on the left; the category and order menus and Play previews on the right. The
+   search narrows to keep them on its row; when they still don't fit beside it, the three get a row of their own under
+   it, sharing its width (the homebar query below). */
+.home-bar { container: homebar / inline-size; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-4); margin-top: var(--sp-6); }
+.home-status { flex: 1 1 100%; display: flex; align-items: center; }
+.home-view { display: flex; align-items: center; gap: var(--sp-2); margin-left: auto; }
+/* 726px: the search at its narrowest (260px), the gap (16px) and the three (450px with "Stop previews") */
+@container homebar (max-width: 726px) {
+  .home-view { flex: 1 1 100%; flex-wrap: wrap; margin-left: 0; min-width: 0; }
+  .home-view .home-sort { flex: 1 1 150px; min-width: 0; }
+  .home-view select.home-order { width: 100%; }
+  .home-view .home-btn { margin-left: auto; } /* on a line of its own (a very narrow window), still at the right */
+}
+/* Play previews and the two menus: outlined chips with an icon, like Figma's "Design resources" filters */
+.home-btn { flex: none; height: 32px; padding: 0 var(--sp-3) 0 10px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel); color: var(--text); display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: var(--fs-md); font-weight: 500; white-space: nowrap; transition: background 0.12s, border-color 0.12s, color 0.12s; }
+.home-btn:hover { background: var(--raise); }
+.home-btn svg { width: 14px; height: 14px; color: var(--muted); }
+.home-btn[aria-pressed="true"] { background: var(--selected-bg); border-color: transparent; color: var(--accent-text); }
+.home-btn[aria-pressed="true"] svg { color: var(--accent-text); }
+.home-sort { position: relative; display: block; flex: none; }
+.home-sort > span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.home-sort svg { width: 14px; height: 14px; }
+select.home-order {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 32px;
+  padding: 0 28px 0 30px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M.6.6 4 4 7.4.6' fill='none' stroke='%23999' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center;
+  color: var(--text);
+  font-size: var(--fs-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+select.home-order:hover { background-color: var(--raise); }
+select.home-order:focus-visible { outline: none; border-color: var(--accent); }
+.home-tools { display: flex; align-items: center; gap: var(--sp-2); flex: 1 1 260px; max-width: 448px; } /* narrows (to 260 px) before the right side wraps */
+.home-search { position: relative; display: block; flex: 1; min-width: 0; }
+/* the dark / light switch: an outlined button (like Play previews) right after the search, the same height */
+.theme-btn { flex: none; width: 32px; height: 32px; padding: 0; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel); color: var(--text); display: grid; place-items: center; transition: background 0.12s, border-color 0.12s; }
+.theme-btn:hover { background: var(--raise); }
+.theme-btn svg { width: 16px; height: 16px; }
+.home-search > span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--faint); pointer-events: none; }
+.home-search svg { width: 14px; height: 14px; }
+.home-search input.txt { height: 32px; padding: 0 var(--sp-3) 0 32px; font-size: var(--fs-md); }
+.home-search input.txt::placeholder { color: var(--faint); }
+.home-empty { max-width: 1180px; margin: var(--sp-2) auto 0; color: var(--muted); font-size: var(--fs-md); }
+.home-meta { font: var(--fs-xs) var(--sans); color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: var(--sp-2); }
+.home-meta i { width: 6px; height: 6px; margin-left: 3px; border-radius: 50%; background: #14ae5c; box-shadow: 0 0 0 3px rgba(20, 174, 92, 0.18); } /* its soft 3px ring lines up with the page's left edge */
+/* Under the last row of cards, where GitHub and Contact used to be */
+.home-note { max-width: 1180px; margin: 40px auto 4px; text-align: center; color: var(--muted); font-size: var(--fs-md); line-height: 1.5; }
+/* file cards: the preview on top over a divider, the name and details below */
+.tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--sp-4); max-width: 1180px; margin: 0 auto; }
+.tool-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--panel);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.12s, box-shadow 0.2s var(--ease);
+}
+.tool-card:hover { border-color: var(--line-2); box-shadow: var(--shadow-hover); }
+.tool-card:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px; }
+.tc-art { position: relative; aspect-ratio: 4 / 3; background: var(--raise); overflow: hidden; border-bottom: 1px solid var(--line); }
+.tc-art canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tc-num { position: absolute; top: var(--sp-2); left: var(--sp-2); font: 600 var(--fs-2xs) var(--sans); font-variant-numeric: tabular-nums; color: #fff; background: rgba(0, 0, 0, 0.55); padding: 2px 6px; border-radius: var(--r-xs); }
+.tc-play { position: absolute; right: var(--sp-2); bottom: var(--sp-2); font: 500 var(--fs-2xs) var(--sans); color: #fff; background: rgba(0, 0, 0, 0.55); padding: 2px 6px; border-radius: var(--r-xs); opacity: 0; transition: opacity 0.15s; }
+.tool-card:hover .tc-play, .tool-card.playing .tc-play { opacity: 1; }
+.home.all-playing .tc-play { display: none; } /* Play previews: every card plays, no need to say so on each */
+/* the body is a column so "Open" sits at the bottom and lines up across each row */
+.tc-body { padding: 10px var(--sp-3) var(--sp-3); display: flex; flex-direction: column; gap: 6px; }
+.tc-title { display: flex; align-items: center; gap: var(--sp-2); }
+.tc-title b { font-size: var(--fs-md); font-weight: 600; }
+.chip { font: 500 var(--fs-2xs) var(--sans); color: var(--muted); border: 1px solid var(--line-2); border-radius: var(--r-xs); padding: 1px 5px; }
+/* the style's kind on a home card: a small grey tag (the colour swatches' .sw .chip keep their own look) */
+.tc-title .chip { color: var(--accent-text); background: var(--selected-bg); border: 0; padding: 2px 6px; }
+.tc-body p { margin: 0; color: var(--muted); font-size: var(--fs-sm); line-height: 1.5; }
+.tc-open { display: inline-flex; align-self: flex-start; align-items: center; gap: 2px; color: var(--muted); font-size: var(--fs-sm); font-weight: 500; margin-top: auto; padding-top: var(--sp-1); transition: color 0.12s; }
+.tc-open svg { width: 12px; height: 12px; }
+.tool-card:hover .tc-open { color: var(--accent-text); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1480px) {
+  .actions .btn.primary kbd, .actions .sep { display: none; }
+}
+@media (max-width: 1400px) {
+  .actions .btn:not(.primary) .lbl { display: none; }
+  .actions .btn:not(.primary):not(.icon) { padding: 0; aspect-ratio: 1; }  /* icon only: square */
+}
+@media (max-width: 1180px) {
+  .app { grid-template-columns: 272px minmax(0, 1fr) 256px; }
+  .actions .lbl { display: none; }
+  .actions .btn.primary { padding: 0; aspect-ratio: 1; }
+}
+@media (min-width: 861px) and (max-width: 1020px) {
+  /* a narrow middle: the title gets its own line above the buttons; the dots under the artboard
+     (and ← →) still step through the variations */
+  .topbar { flex-wrap: wrap; row-gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); }
+  .title { flex-basis: 100%; }
+  .actions { flex-wrap: wrap; }
+  .statusbar { min-height: calc(2 * 1.45em + 2 * var(--sp-2)); } /* room for its two lines, so the artboard doesn't jump as the frame count changes */
+  #backBtn, #fwdBtn { display: none; }
+}
+@media (max-width: 860px) {
+  body { overflow: auto; }
+  /* One column, the whole page scrolls: the strip (brand, Home, the dark / light switch, the style menu), the title and
+     actions, the artboard and its status, the style's name and description, the output (frame, export, library), the
+     settings, and the kept strip at the bottom. (In the strip, Default is the icon after Home and dark / light.) The artboard stays pinned under the strip while everything below it
+     scrolls underneath, so every change to a setting shows as it happens.
+     (main's and both settings boxes' children join the page's grid, ordered here.) */
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; height: auto; }
+  .main, .sidebar { display: contents; }
+  .side-top { order: 0; position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 6px; padding: 6px 10px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+  .brand { flex: none; padding: 4px 6px; font-size: var(--fs-lg); }
+  .brand small { font-size: var(--fs-2xs); }  /* the phone strip stays compact */
+  .side-top .side-nav { flex: none; padding: 0; }
+  .side-top .nav-item { flex: none; justify-content: center; padding: 10px 8px; }
+  .nav-item .text { display: none; }
+  .style-pick { flex: 1; min-width: 110px; padding: 0; }
+  .topbar { order: 1; flex-wrap: wrap; }
+  .title { flex-basis: 100%; }  /* the title on its own line, the toolbar under it */
+  /* --strip-h: the strip's height; --fit-h: the height that fits the frame's shape at this width (app.js) */
+  .stage {
+    order: 2;
+    position: sticky;
+    top: var(--strip-h, 0px);
+    z-index: 15;
+    height: min(var(--fit-h, 48vh), 48vh);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 16px 24px -20px rgba(0, 0, 0, 0.95);
+  }
+  .statusbar { order: 3; border-top: 0; }
+  .home { order: 4; padding: 28px var(--sp-4); overflow: visible; }
+  .sidebar .panel { display: contents; }  /* so its name-and-description note can go above the output */
+  #panel > * { background: var(--panel); }
+  #panel > .note.about { order: 5; border-top: 1px solid var(--line); }
+  .outputs { order: 6; border-left: 0; }
+  #panel > .sec { order: 8; }
+  .kept { order: 9; }
+  .app:not(.is-home) .kept { border-top: 0; } /* the last setting's line is right above it */
+  .panel { border-left: 0; overflow: visible; }
+  .panel-head { position: static; }
+  .outputs .side-foot, .outputs .sec[data-sec="keys"] { display: none; } /* no keyboard on a phone */
+  .app.is-home { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+  .app.is-home .kept { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+  :root { --fs-display: 38px; --fs-subhead: 16px; }  /* tablets: a smaller hero */
+  .swatches { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); } /* the settings at full width: names like Background fit without the gap */
+}
+/* Phones and tablets: no Play previews button, the cards on screen play on their own (app.js, NO_HOVER) */
+@media (hover: none), (pointer: coarse) {
+  #previewsBtn { display: none; }
+}
+/* Phones: the title, Generative Tool, GitHub and Contact on one row; then the style count, the search across the page,
+   and the category and order menus side by side, sharing the width (Play previews too, where it shows) */
+@media (max-width: 600px) {
+  :root { --fs-display: 32px; --fs-subhead: 15px; }  /* phones: smaller still */
+  .home-head { padding-top: var(--sp-2); }
+  /* The title shrinks as much as it needs to keep the row on one line (all 32px from about 450px wide up): 100cqi is
+     the row's width, 118px what GitHub and Contact take with the gap (and a little spare), 10.5 the title's width per
+     px of size. Below about 330px wide, Generative Tool goes under the title instead. */
+  .home-title { --title-fs: clamp(16px, calc((100cqi - 118px) / 10.5), var(--fs-display)); --link-fs: var(--fs-sm); flex-wrap: nowrap; gap: var(--sp-3); margin-bottom: var(--sp-4); container-type: inline-size; }
+  .home-head h1 { flex: 1 1 auto; }
+  .home-head h1 span { font-size: max(0.5em, 10px); }
+  .home-links { flex: none; gap: 0; margin-right: -6px; }
+  .home-link { padding: 0 6px; }
+  .home-bar { margin-top: var(--sp-5); gap: 10px var(--sp-4); }
+  .home-tools { flex: 1 1 100%; max-width: none; } /* the search across the page */
+}
+@media (max-width: 480px) {
+  .brand small { display: block; margin-top: 1px; } /* Generative Tool under the name: the strip has no room beside it */
+}
+@media (max-width: 380px) and (hover: none), (max-width: 380px) and (pointer: coarse) {
+  .home-view { gap: 6px; }
+  .home-meta { font-size: var(--fs-2xs); gap: 6px; }
+  .home-sort > span { left: 9px; }
+  select.home-order { padding-left: 28px; font-size: var(--fs-sm); }
+}
+@media (max-width: 350px) and (hover: none), (max-width: 350px) and (pointer: coarse) {
+  /* the smallest phones: no room for both menus on one row, so they stack */
+  .home-view { flex-wrap: wrap; }
+  .home-view .home-sort { flex: 1 1 100%; }
+}
+@media (hover: none) {
+  .gens button { width: 24px; height: 28px; }
+  .gens i { width: 7px; height: 7px; }
+}
+@supports (height: 1svh) {
+  /* phones: half of the screen with the browser's bars showing, so it never jumps while they hide */
+  @media (max-width: 860px) { .stage { height: min(var(--fit-h, 48svh), 48svh); } }
+}
