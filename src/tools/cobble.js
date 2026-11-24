@@ -380,7 +380,7 @@
     animHint: 'How much the cluster breathes, the cells shift and the patterns move (0: still)',
     defaults: {
       palette: 'Ember', // the preset the style opens on (its card's colors)
-      anim: { amount: 0.6, fps: 12, frames: 72 },
+      anim: { amount: 0.15, fps: 12, frames: 72 },
       fx: {},
     },
     build,

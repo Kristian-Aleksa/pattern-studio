@@ -12629,7 +12629,7 @@ PL.tools = (() => {
     animHint: 'How much the cluster breathes, the cells shift and the patterns move (0: still)',
     defaults: {
       palette: 'Ember', // the preset the style opens on (its card's colors)
-      anim: { amount: 0.6, fps: 12, frames: 72 },
+      anim: { amount: 0.15, fps: 12, frames: 72 },
       fx: {},
     },
     build,
@@ -12673,14 +12673,16 @@ PL.tools = (() => {
       shows through. Texture leaves the canvas's tooth bare in fine specks,
       in loose clumps, the same specks through every layer, so the canvas
       (the first color) shows through everywhere.
-   7. Animation (Wind): gusts run across the frame from left to right: the
-      flicks bend downwind and back round their roots, their tips curling
-      over, and the strokes sway round their middles and drift sideways,
-      twice a loop; the first layer's strokes drift slowly like clouds and
-      the edges roll up and down, once a loop. The near layers move more
-      than the far ones, and the canvas stays put. Every movement is
-      measured from the still picture, so frame 1 is the still picture at
-      any Wind. 120 frames at 30 a second; seamless; Wind 0 holds still.
+   7. Animation (Wind): gusts run across the frame from left to right, and
+      every layer sways back and forth in them like a tuft of grass, twice
+      a loop: rooted along its bottom edge, it bends downwind and back, the
+      more the higher up it (its top edge sways furthest, dipping a little
+      as it bends), and each of its strokes leans with it and flexes round
+      its own root like a tuft of its own. The flicks ride the top edges
+      and bend on top of that, their tips curling over. The near layers
+      move more than the far ones, and the canvas stays put. Every movement
+      is measured from the still picture, so frame 1 is the still picture
+      at any Wind. 120 frames at 26 a second; seamless; Wind 0 holds still.
       Each frame only works out the wind and lays down strokes painted once
       (sprites), so the animation plays smoothly.
    Sizes go with the frame's area and edges with its height, so another
@@ -12760,18 +12762,18 @@ PL.tools = (() => {
   /* ---- settings -------------------------------------------------------------------------- */
   const S = (section, key, label, min, max, def, extra = {}) => ({ section, key, label, type: 'range', min, max, def, step: 1, ...extra });
   const PARAMS = [
-    S('Layers', 'horizon', 'Horizon', 10, 85, 42, { unit: '%', rand: [25, 60], hint: 'How much of the frame the main layer takes (Weight picks which; at 100 % it is the top one)' }),
-    S('Layers', 'weight', 'Weight', 0, 100, 100, { unit: '%', rand: [0, 100], hint: 'Which layer is the main, widest one: the top one at 100 %, down through the layers to the bottom one at 0 %' }),
-    S('Layers', 'tilt', 'Tilt', -30, 30, 6, { unit: '°', rand: [-14, 14], hint: "How far the layers' edges slope (positive: down to the right)" }),
-    S('Layers', 'hills', 'Hills', 0, 100, 45, { unit: '%', rand: [15, 80], hint: "How much the layers' edges rise and fall" }),
-    S('Strokes', 'brush', 'Brush size', 10, 100, 40, { rand: [25, 65], hint: 'How wide the strokes are' }),
-    S('Strokes', 'length', 'Length', 150, 1000, 420, { unit: '%', rand: [250, 700], hint: "How long the strokes are, as a share of the brush's width" }),
-    S('Strokes', 'angle', 'Angle', -90, 90, 68, { unit: '°', rand: [-85, 85], hint: 'Which way the strokes run: 0° lying flat, 90° upright, leaning right in between (negative: leaning left)' }),
-    S('Strokes', 'spread', 'Spread', 0, 60, 16, { unit: '°', rand: [4, 34], hint: "How much the strokes' directions vary, from layer to layer and stroke to stroke" }),
-    S('Paint', 'dry', 'Dry brush', 0, 100, 55, { unit: '%', rand: [25, 85], hint: 'How dry the brush is: streaky strokes that break up toward their ends, so what is beneath shows through' }),
-    S('Paint', 'texture', 'Texture', 0, 100, 45, { unit: '%', rand: [20, 70], hint: 'How much of the canvas shows through the paint in fine specks' }),
-    S('Paint', 'fringe', 'Fringe', 0, 100, 50, { unit: '%', rand: [20, 85], hint: "How far the grassy flicks along each layer's top edge reach up" }),
-    S('Paint', 'mix', 'Mix', 0, 100, 35, { unit: '%', rand: [10, 60], hint: "How much the paints mix: patches of the neighbouring layers' paints in each layer, and a little of another paint in every stroke" }),
+    S('Layers', 'horizon', 'Horizon', 10, 85, 50, { unit: '%', rand: [25, 60], hint: 'How much of the frame the main layer takes (Weight picks which; at 100 % it is the top one)' }),
+    S('Layers', 'weight', 'Weight', 0, 100, 73, { unit: '%', rand: [0, 100], hint: 'Which layer is the main, widest one: the top one at 100 %, down through the layers to the bottom one at 0 %' }),
+    S('Layers', 'tilt', 'Tilt', -30, 30, -9, { unit: '°', rand: [-14, 14], hint: "How far the layers' edges slope (positive: down to the right)" }),
+    S('Layers', 'hills', 'Hills', 0, 100, 37, { unit: '%', rand: [15, 80], hint: "How much the layers' edges rise and fall" }),
+    S('Strokes', 'brush', 'Brush size', 10, 100, 41, { rand: [25, 65], hint: 'How wide the strokes are' }),
+    S('Strokes', 'length', 'Length', 150, 1000, 402, { unit: '%', rand: [250, 700], hint: "How long the strokes are, as a share of the brush's width" }),
+    S('Strokes', 'angle', 'Angle', -90, 90, 37, { unit: '°', rand: [-85, 85], hint: 'Which way the strokes run: 0° lying flat, 90° upright, leaning right in between (negative: leaning left)' }),
+    S('Strokes', 'spread', 'Spread', 0, 60, 7, { unit: '°', rand: [4, 34], hint: "How much the strokes' directions vary, from layer to layer and stroke to stroke" }),
+    S('Paint', 'dry', 'Dry brush', 0, 100, 81, { unit: '%', rand: [25, 85], hint: 'How dry the brush is: streaky strokes that break up toward their ends, so what is beneath shows through' }),
+    S('Paint', 'texture', 'Texture', 0, 100, 57, { unit: '%', rand: [20, 70], hint: 'How much of the canvas shows through the paint in fine specks' }),
+    S('Paint', 'fringe', 'Fringe', 0, 100, 33, { unit: '%', rand: [20, 85], hint: "How far the grassy flicks along each layer's top edge reach up" }),
+    S('Paint', 'mix', 'Mix', 0, 100, 25, { unit: '%', rand: [10, 60], hint: "How much the paints mix: patches of the neighbouring layers' paints in each layer, and a little of another paint in every stroke" }),
   ];
 
   // Constants. Sizes in px at a 1080 x 1080 frame (they go with the frame's area); edges in frame heights.
@@ -12823,17 +12825,18 @@ PL.tools = (() => {
     mixThr: [0.7, -0.2],   // ... strokes go in where the patch noise is above this (Mix 0 -> 100 %)
     accent: [0.8, 0.6, 1.15], // patch strokes: this long and wide (x the layer's), this much further apart ...
     patchSoft: 0.35,       // ... thinning out at the patches' edges
-    sway: 0.22,            // Wind 1: strokes sway this far either way (radians) ...
-    drift: 0.5,            // ... and drift this far sideways (x Brush size) ...
-    skySway: 0.1,          // ... the first layer's this far ...
-    skyDrift: 1.2,         // ... and this far (like clouds)
-    gust: 0.72,            // Wind 1: in the gusts the flicks bend this far downwind and back (radians) ...
+    tuft: 1.2,             // Wind 1: every layer sways like a tuft of grass, its top this far either way (x Brush size) ...
+    tuftH: 6,              // ... less where the layer is thinner than this (x Brush size) ...
+    dip: 0.6,              // ... its top dipping as it bends (keeping its length: this x sway² / height) ...
+    flex: 0.26,            // ... each stroke a tuft of its own too, flexing round its root this much (sideways per px up) ...
+    lean: 0.7,             // ... leaning in all a little short of this much at most (sideways per px up; it eases off)
+    gust: 0.72,            // Wind 1: on top of that the flicks bend this far downwind and back (radians) ...
     flickBend: 0.34,       // ... their tips curling over by this much (x their length)
-    ripple: 0.7,           // Wind 1: the edges roll this far up and down (x Brush size)
-    near: [0.6, 1.2],      // the back layer moves this much of that, the front one this much
-    beats: 2,              // the grass and the strokes swing this many times a loop (the clouds and the edges once)
-    waveL: 0.75,           // the gusts are this far apart (x the frame's size), running left to right
-    beat: 0.8,             // each stroke a little off the wave (radians), so neighbours move nearly together
+    near: [0.75, 1.15],    // the back layer moves this much of that, the front one this much
+    beats: 2,              // the layers sway back and forth this many times a loop
+    waveL: 1.2,            // the gusts are this far apart (x the frame's size), running left to right ...
+    lag: 0.45,             // ... reaching each layer a little after the one behind it (radians)
+    beat: 0.5,             // each stroke and flick a little off the wave (radians), so neighbours sway nearly together
   };
 
   /* ---- textures -------------------------------------------------------------------------- */
@@ -12926,33 +12929,41 @@ PL.tools = (() => {
   }
   // the edges sampled over x0 ... x1 (the hills are smooth: a few px apart is plenty)
   function edgeTable(E, x0, x1) {
-    const step = Math.max(1, E.bw / 8), n = Math.ceil((x1 - x0) / step) + 2;
+    const step = Math.max(1, E.bw / 8);
+    x0 = Math.floor(x0 / step) * step; // (on a fixed grid, so every view samples the same points)
+    const n = Math.ceil((x1 - x0) / step) + 2;
     E.table = null;
     const y = E.edges.map((g, e) => { const a = new Float32Array(n); for (let i = 0; i < n; i++) a[i] = edgeNoise(E, e, x0 + i * step); return a; });
     E.table = { x0, step, n, y };
   }
-  // ... and its ripple at time t (Wind; th: 0 ... 2π over a loop): edge e is the top of layer e + 1
-  const near = (E, k) => (E.nL > 1 ? K.near[0] + ((K.near[1] - K.near[0]) * k) / (E.nL - 1) : 1);
-  const ripple = (E, e, x, th, amount) => {
-    if (!amount) return 0;
-    const ph = E.edges[e].ph - (2 * Math.PI * x) / (K.waveL * E.A);
-    return amount * near(E, e + 1) * K.ripple * E.bw * (Math.sin(th + ph) - Math.sin(ph));
-  };
-  // the wind: a wave running across the frame, n times a loop (ph: where on it a stroke sits); every movement is
-  // measured from the still picture (th = 0)
+  // The wind (th: 0 ... 2π over a loop): gusts running across the frame from left to right, n times a loop (ph: where
+  // on their wave a point is). Every layer sways in them like a tuft of grass rooted along its bottom edge. Every
+  // movement is measured from the still picture (th = 0).
   const swing = (th, ph, n) => Math.sin(n * th + ph) - Math.sin(ph);
+  const waveAt = (E, x, k) => -(2 * Math.PI * x) / (K.waveL * E.A) - K.lag * k; // (each layer a little after the one behind it)
+  const near = (E, k) => (E.nL > 1 ? K.near[0] + ((K.near[1] - K.near[0]) * k) / (E.nL - 1) : 1);
+  // layer k at x (world px): how tall it is (from its top edge, or the frame's top, to its bottom edge, or the
+  // frame's bottom) and how far its top sways at Wind 1 (less where it is thin)
+  const heightAt = (E, k, x) => Math.max(0.5 * E.bw, (k < E.nL - 1 ? edgeAt(E, k, x) : E.H) - (k > 0 ? edgeAt(E, k - 1, x) : 0));
+  const tuftAt = (E, k, hb) => near(E, k) * K.tuft * E.bw * Math.min(1, hb / (K.tuftH * E.bw));
+  // how far a point h of the way up its layer (0: the bottom edge, its root; 1: its top) goes with the top, and how
+  // steeply: a blade of grass bending in the wind (a cantilever under an even load)
+  const bendP = (h) => (h <= 0 ? 0 : h >= 1 ? 1 + (4 / 3) * (h - 1) : (h * h * (6 - 4 * h + h * h)) / 3);
+  const bendD = (h) => (h <= 0 ? 0 : h >= 1 ? 4 / 3 : (4 * h * (3 - 3 * h + h * h)) / 3);
 
   /* ---- the strokes ------------------------------------------------------------------------ */
   // Every stroke that can touch region R (world px), lying still, layer by layer (back to front): its strokes
   // (shuffled), then its patches of the neighbours' paints, then the flicks along its top edge. A stroke:
   // { x, y (its middle; a flick's: its root), a (its angle), L, w, c (its paint), m (another paint mixed in, f of it),
-  //   kind (0 stroke, 1 flick, 2 patch), id (its bristles), key (its sprite), k (its layer), ph (its place on the wind's wave) }
+  //   kind (0 stroke, 1 flick, 2 patch), id (its bristles), key (its sprite), k (its layer), and for the wind: rx, ry
+  //   (its root: its lower end), up (it starts there), ph (its place on the gusts' wave), hb (its layer's height
+  //   there), T (how far its layer's top sways there at Wind 1), P and D (how far up its layer its root is, bent:
+  //   bendP, bendD); a flick's pl: its root's place on the wave }
   function stillStrokes(seed, p, E, R) {
     const layers = [];
     const { bw, len, nL, A } = E;
     const mix = clamp01((p.mix ?? 35) / 100), fringe = clamp01((p.fringe ?? 50) / 100);
     const spread = ((p.spread ?? 16) * Math.PI) / 180;
-    const wave = (x) => -(2 * Math.PI * x) / (K.waveL * A);
     const ox = E.W / 2, oy = E.H / 2;
     const mixThr = lerp(K.mixThr[0], K.mixThr[1], mix), toneMax = lerp(K.tone[0], K.tone[1], mix);
     const pl = K.mixL * A;
@@ -12962,13 +12973,13 @@ PL.tools = (() => {
       if (k === nL - 1) return k - 1;
       return E.NM.noise4(x / (1.6 * pl), y / (1.6 * pl), k * 3.1 + 5.3, 1.3) > 0 ? k + 1 : k - 1;
     };
-    // (the strokes drift and the edges roll up to this far at Wind 2, so the strokes just outside R are kept too)
-    const drift = 4 * Math.max(K.near[1] * K.drift, K.near[0] * K.skyDrift) * bw, rise = 4 * K.near[1] * K.ripple * bw;
+    // (at Wind 2 the layers sway up to this far sideways and dip up to this far, so the strokes just outside R are kept too)
+    const sway = 4 * K.near[1] * K.tuft * (4 / 3) * bw, dip = 4.2 * bw;
     // a grid of strokes over R in layer k (length L, width w), kept where keep(x, y, angle) gives a paint
     const grid = (out, k, L, w, step, salt, keep, tone) => {
       const a0 = E.angs[k], dx = Math.cos(a0), dy = -Math.sin(a0), nx = -dy, ny = dx;
-      const sL = L * K.stepL * step, sW = w * K.stepW * step, M = L + w + drift;
-      const X0 = R.x0 - M, X1 = R.x1 + M, Y0 = R.y0 - M, Y1 = R.y1 + M;
+      const sL = L * K.stepL * step, sW = w * K.stepW * step, M = L + w;
+      const X0 = R.x0 - M - sway, X1 = R.x1 + M + sway, Y0 = R.y0 - M - dip, Y1 = R.y1 + M;
       let i0 = Infinity, i1 = -Infinity, j0 = Infinity, j1 = -Infinity;
       for (const x of [X0, X1]) for (const y of [Y0, Y1]) {
         const a = ((x - ox) * dx + (y - oy) * dy) / sL, b = ((x - ox) * nx + (y - oy) * ny) / sW;
@@ -12988,10 +12999,14 @@ PL.tools = (() => {
         // its paint: the layer's, with a little of another (the canvas or a neighbour's) mixed in
         const h8 = hash(seed, i, j, salt + 8);
         const m = !tone ? -1 : h8 < 0.5 ? 0 : 1 + neighbour(cx, cy, k), f = m < 0 ? 0 : toneMax * hash(seed, i, j, salt + 9);
+        // in the wind it goes with its layer from its root (its lower end), the more the higher up the layer that is
+        const up = Math.sin(a) >= 0, rx = cx + ((up ? -1 : 1) * Math.cos(a) * sl) / 2, ry = cy + (Math.abs(Math.sin(a)) * sl) / 2;
+        const yB = k < nL - 1 ? edgeAt(E, k, rx) : E.H, hb = heightAt(E, k, rx), h = clamp((yB - ry) / hb, 0, 1.25);
         list.push({
-          x: cx, y: cy, a, L: sl, w: sw, c: 1 + c, m, f, kind: tone ? 0 : 2, id: hash(seed, i, j, salt + 11), o: hash(seed, i, j, salt + 12),
+          x: cx, y: cy, a, ca: Math.cos(a), sa: -Math.sin(a), L: sl, w: sw, c: 1 + c, m, f, kind: tone ? 0 : 2, id: hash(seed, i, j, salt + 11), o: hash(seed, i, j, salt + 12),
           key: salt + ':' + i + ':' + j + '|' + (1 + c) + '|' + m + '|' + f.toFixed(4), k,
-          ph: wave(cx) + K.beat * (2 * hash(seed, i, j, salt + 6) - 1), // (on the wave, a little off it)
+          rx, ry, up, ph: waveAt(E, rx, k) + K.beat * (2 * hash(seed, i, j, salt + 6) - 1), // (on the wave, a little off it)
+          hb, T: tuftAt(E, k, hb), P: bendP(h), D: bendD(h),
         });
       }
       list.sort((a, b) => a.o - b.o); // a shuffled order
@@ -13019,20 +13034,21 @@ PL.tools = (() => {
       if (top >= 0 && fringe > 0) {
         const step = bw * K.flickStep, M = bw * (K.flickLen[1] + 1);
         const lean = (E.angs[k] - Math.PI / 2) * K.flickLean;
-        for (let i = Math.floor((R.x0 - M) / step); i <= Math.ceil((R.x1 + M) / step); i++) {
+        for (let i = Math.floor((R.x0 - M - sway) / step); i <= Math.ceil((R.x1 + M + sway) / step); i++) {
           const h1 = hash(seed, i, k, 0x51), h2 = hash(seed, i, k, 0x52), h3 = hash(seed, i, k, 0x53), h4 = hash(seed, i, k, 0x54);
           const x = (i + h1) * step;
           const clump = clamp01(0.5 + 1.1 * E.NZ.noise4(x / (K.flickClump * bw), k * 2.3, 3.3, 7.7));
           if (clump < 0.35 * hash(seed, i, k, 0x58)) continue; // gaps between the clumps
           const y = edgeAt(E, top, x) + bw * lerp(K.flickDepth[0], K.flickDepth[1], h2);
           const fl = fringe * bw * lerp(K.flickLen[0], K.flickLen[1], h3 * h3) * (0.3 + 0.9 * clump);
-          if (y + bw + rise < R.y0 - fl || y - fl - rise > R.y1 + bw) continue;
+          if (y + bw + dip < R.y0 - fl || y - fl > R.y1 + bw) continue;
           const c = mix > 0 && nL > 1 && patch(x, y, k) > mixThr + K.patchSoft * (hash(seed, i, k, 0x59) - 0.5) ? neighbour(x, y, k) : k;
           const m = hash(seed, i, k, 0x5a) < 0.5 ? 0 : 1 + neighbour(x, y, k);
+          const hb = heightAt(E, k, x), pl = waveAt(E, x, k);
           out.push({
             x, y, a: Math.PI / 2 + lean + spread * 0.5 * (2 * h4 - 1), L: fl, w: bw * lerp(K.flickWid[0], K.flickWid[1], hash(seed, i, k, 0x56)),
             c: 1 + c, m, f: 0.6 * toneMax * hash(seed, i, k, 0x5b), kind: 1, id: hash(seed, i, k, 0x57), k,
-            ph: wave(x) + K.beat * (2 * hash(seed, i, k, 0x55) - 1),
+            ph: pl + K.beat * (2 * hash(seed, i, k, 0x55) - 1), pl, hb, T: tuftAt(E, k, hb),
           });
         }
       }
@@ -13041,31 +13057,31 @@ PL.tools = (() => {
     return layers;
   }
 
-  // The wind on stroke s at time t (th: 0 ... 2π over a loop) puts into o where it starts (a flick: its root), its
-  // angle and how far a flick's tip curls over. The grass bends downwind and back round its roots and the strokes
-  // sway round their middles and drift sideways, K.beats times a loop; the first layer's strokes drift like clouds
-  // and the edges roll, once a loop. The near layers move more than the far ones.
+  // The wind on stroke s at time t (th: 0 ... 2π over a loop) puts into o where its root is and how it leans. Its
+  // layer bends like a tuft of grass: the higher up it, the further a stroke's root sways (o.x, o.y), its top dipping
+  // a little as it bends, and the stroke leans with it and flexes round its root like a tuft of its own (o.sh:
+  // sideways per px up). A flick's root (o.x, o.y) rides its layer's top edge, and the flick bends on top of that,
+  // round its root (o.a), its tip curling over (o.curl).
   function blow(E, s, th, amount, o) {
-    const wk = amount * near(E, s.k);
     if (s.kind === 1) {
-      const g = wk ? 0.5 * wk * swing(th, s.ph, K.beats) : 0;
-      o.x = s.x;
-      o.y = s.y + ripple(E, s.k - 1, s.x, th, amount);
+      const d = amount * s.T * swing(th, s.pl, K.beats), g = 0.5 * amount * near(E, s.k) * swing(th, s.ph, K.beats);
+      o.x = s.x + d;
+      o.y = s.y + (K.dip * d * d) / s.hb;
       o.a = s.a - K.gust * g;
       o.curl = K.flickBend * g;
+      o.sh = 0;
       return o;
     }
-    const sky = s.k === 0, n = sky ? 1 : K.beats;
-    const a = wk ? s.a + wk * (sky ? K.skySway : K.sway) * swing(th, s.ph, n) : s.a;
-    const x = wk ? s.x + wk * (sky ? K.skyDrift : K.drift) * E.bw * swing(th, s.ph + 0.9, n) : s.x;
-    o.a = a;
-    o.x = x - (Math.cos(a) * s.L) / 2;
-    o.y = s.y + (Math.sin(a) * s.L) / 2;
+    const G = swing(th, s.ph, K.beats), d = amount * s.T * G;
+    o.x = s.rx + d * s.P;
+    o.y = s.ry + (K.dip * d * d * s.P) / s.hb;
+    o.a = s.a;
+    o.sh = K.lean * Math.tanh((-d * s.D) / s.hb / K.lean - (K.flex * amount * near(E, s.k) * G) / K.lean);
     o.curl = 0;
     return o;
   }
 
-  // (for the checks) every stroke as it is drawn at time t: { x, y (where it starts; a flick: its root), a, L, w, c, m, f, kind, id, key, curl }
+  // (for the checks) every stroke as it is drawn at time t: { x, y (its root), a, sh (its lean), L, w, c, m, f, kind, id, key, curl }
   function strokes(seed, p, E, R, t, amount) {
     const th = 2 * Math.PI * (((t % 1) + 1) % 1);
     return stillStrokes(seed, p, E, R).map((list) => list.map((s) => blow(E, s, th, amount, { L: s.L, w: s.w, c: s.c, m: s.m, f: s.f, kind: s.kind, id: s.id, key: s.key })));
@@ -13272,21 +13288,27 @@ PL.tools = (() => {
       return x;
     }
     const E = layout(seed, p, W, H, nL);
-    { const M = E.len + E.bw * (K.flickLen[1] + 2); edgeTable(E, mx - M, mx + CW * ms + M); }
+    { const M = 1.4 * E.len + 10 * E.bw; edgeTable(E, mx - M, mx + CW * ms + M); }
     const layers = stillStrokes(seed, p, E, { x0: mx, y0: my, x1: mx + CW * ms, y1: my + CH * ms });
-    // where each layer starts on the canvas, column by column: a ragged line a little below its edge
-    const clip = (K.clipIn * E.bw) / ms;
-    const EY = E.edges.map((g, e) => {
-      const a = new Float32Array(CW);
-      for (let i = 0; i < CW; i++) {
-        const x = mx + (i + 0.5) * ms;
-        a[i] = (edgeAt(E, e, x) + K.edgeRag * E.bw * E.NZ.noise4(x / (0.7 * E.bw), e * 1.7, 5.1, 2.2) - my) / ms + clip;
+    // where each layer starts on the canvas, column by column, a little past both sides (it sways): a ragged line a
+    // little below its edge (y), with how far it sways at Wind 1 (T, world px), how tall its layer is (hb) and the sine
+    // and cosine of its place on the gusts' wave (s, c)
+    const clip = (K.clipIn * E.bw) / ms, pad = Math.ceil((4 * K.near[1] * K.tuft * E.bw) / ms) + 4, n = CW + 2 * pad;
+    const lines = E.edges.map((g, e) => {
+      const L = { y: new Float32Array(n), T: new Float32Array(n), hb: new Float32Array(n), s: new Float32Array(n), c: new Float32Array(n) };
+      for (let j = 0; j < n; j++) {
+        const x = mx + (j - pad + 0.5) * ms, hb = heightAt(E, e + 1, x), ph = waveAt(E, x, e + 1);
+        L.y[j] = (edgeAt(E, e, x) + K.edgeRag * E.bw * E.NZ.noise4(x / (0.7 * E.bw), e * 1.7, 5.1, 2.2) - my) / ms + clip;
+        L.T[j] = tuftAt(E, e + 1, hb);
+        L.hb[j] = hb;
+        L.s[j] = Math.sin(ph);
+        L.c[j] = Math.cos(ph);
       }
-      return a;
+      return L;
     });
     let count = 0;
     for (const list of layers) for (const s of list) if (s.kind !== 1) count++;
-    const x = { key, E, layers, EY, count, set: null, gen: -1, wind: -1, colors: '' };
+    const x = { key, E, layers, lines, pad, count, set: null, gen: -1, wind: -1, colors: '' };
     STILLS.unshift(x);
     if (STILLS.length > 6) STILLS.pop();
     return x;
@@ -13305,14 +13327,12 @@ PL.tools = (() => {
       if (set.map.size > 4 * Z.count + 400) restart(set);
       const dry = clamp01((p.dry ?? 55) / 100), wind = Math.max(amount, Z.set === set && Z.gen === set.gen ? Z.wind : 0);
       for (let i = 0; i < 256; i++) LOAD[i] = 1 - dry * K.runOut * sstep(0.3, 1, i / 255);
-      const need = Z.layers.map((list, k) => {
-        const reach = (2 * wind * near(E, k) * (k === 0 ? K.skyDrift : K.drift) * E.bw) / ms + 2;
-        return list.filter((s) => {
-          if (s.kind === 1) return false;
-          const cx = (s.x - mx) / ms, cy = (s.y - my) / ms, rr = (s.L / 2 + s.w) / ms + reach;
-          return cx + rr >= 0 && cy + rr >= 0 && cx - rr <= CW && cy - rr <= CH;
-        });
-      });
+      const need = Z.layers.map((list) => list.filter((s) => {
+        if (s.kind === 1) return false;
+        const d = 2 * wind * s.T; // (the furthest its layer's top sways)
+        const cx = (s.x - mx) / ms, cy = (s.y - my) / ms, rr = (s.L * (0.5 + K.lean) + s.w + d * s.P) / ms + 2;
+        return cx + rr >= 0 && cy + rr + (K.dip * d * d * s.P) / (s.hb * ms) >= 0 && cx - rr <= CW && cy - rr <= CH;
+      }));
       ensureSprites(set, need, ms, dry, rgb);
       for (const list of Z.layers) for (const s of list) if (s.kind !== 1) s.at = set.map.get(s.key) || null;
       Z.set = set;
@@ -13341,12 +13361,17 @@ PL.tools = (() => {
     for (let k = 0; k < nL; k++) {
       const list = Z.layers[k];
       ctx.save();
-      if (k > 0) { // the layer starts at its top line (rolling in the wind)
-        const top = Z.EY[k - 1], e = k - 1, y = (i) => top[i] + ripple(E, e, mx + (i + 0.5) * ms, th, amount) / ms;
+      if (k > 0) { // the layer starts at its top line, swaying with it (and dipping as it bends)
+        const ln = Z.lines[k - 1], n = ln.y.length, pad = Z.pad, Sn = Math.sin(K.beats * th), Cn = Math.cos(K.beats * th);
+        const y = (i) => {
+          const j = Math.min(n - 1, Math.max(0, i + pad)), d = amount * ln.T[j] * (Sn * ln.c[j] + Cn * ln.s[j] - ln.s[j]);
+          const f = Math.min(n - 1.001, Math.max(0, j - d / ms)), j0 = Math.floor(f);
+          return ln.y[j0] + (ln.y[j0 + 1] - ln.y[j0]) * (f - j0) + (K.dip * d * d) / (ln.hb[j] * ms);
+        };
         ctx.beginPath();
-        ctx.moveTo(-2, y(0));
+        ctx.moveTo(-2, y(-2));
         for (let i = 0; i < CW; i += 2) ctx.lineTo(i + 0.5, y(i));
-        ctx.lineTo(CW + 2, y(CW - 1));
+        ctx.lineTo(CW + 2, y(CW + 1));
         ctx.lineTo(CW + 2, CH + 2);
         ctx.lineTo(-2, CH + 2);
         ctx.closePath();
@@ -13354,15 +13379,15 @@ PL.tools = (() => {
       }
       ctx.fillStyle = colors[k + 1]; // its ground coat
       ctx.fillRect(0, 0, CW, CH);
-      // its strokes and patches, turned and moved by the wind
+      // its strokes and patches, going with the layer in the wind (each leaning round its root)
       for (const s of list) {
-        if (s.kind === 1) continue;
+        if (s.kind === 1 || !s.at) continue;
         blow(E, s, th, amount, o);
-        const sx = (o.x - mx) / ms, sy = (o.y - my) / ms, Lc = s.L / ms, rr = Lc / 2 + s.w / ms + 2;
-        const dx = Math.cos(o.a), dy = -Math.sin(o.a), cx = sx + (dx * Lc) / 2, cy = sy + (dy * Lc) / 2;
-        const at = s.at;
-        if (!at || cx + rr < 0 || cy + rr < 0 || cx - rr > CW || cy - rr > CH) continue;
-        ctx.setTransform(dx, dy, -dy, dx, sx, sy);
+        const at = s.at, Lc = s.L / ms, dx = s.ca, dy = s.sa, sh = o.sh, rx = (o.x - mx) / ms, ry = (o.y - my) / ms;
+        const sx = s.up ? rx : rx - dx * Lc, sy = s.up ? ry : ry - dy * Lc; // (where it starts, before it leans)
+        const my2 = sy + (dy * Lc) / 2, cx = sx + (dx * Lc) / 2 + sh * (my2 - ry), rr = (Lc / 2) * (1 + Math.abs(sh)) + s.w / ms + 2;
+        if (cx + rr < 0 || my2 + rr < 0 || cx - rr > CW || my2 - rr > CH) continue;
+        ctx.setTransform(dx + sh * dy, dy, sh * dx - dy, dx, sx + sh * (sy - ry), sy);
         ctx.drawImage(at.c, at.sx, at.sy, at.w, at.h, -at.ox, -at.oy, at.w, at.h);
         drawn++;
       }
@@ -13407,7 +13432,7 @@ PL.tools = (() => {
     name: 'Brush',
     kind: 'Organic',
     tagline: 'Layered brush strokes',
-    about: 'Layers of paint laid on in brush strokes, from the back to the front like a landscape: streaky, dry-brushed strokes with ragged ends, grassy flicks along every edge and patches of the neighbouring colors, with the canvas showing through in fine specks. In the animation the wind runs through it: the grass bends, the strokes sway and the edges roll.',
+    about: 'Layers of paint laid on in brush strokes, from the back to the front like a landscape: streaky, dry-brushed strokes with ragged ends, grassy flicks along every edge and patches of the neighbouring colors, with the canvas showing through in fine specks. In the animation the wind runs through it: every layer sways back and forth like tufts of grass.',
     raster: true,
     inks: {
       min: 3, max: 9, roles, fit, spec, add, generate,
@@ -13418,9 +13443,10 @@ PL.tools = (() => {
     palettes: PALETTES,
     params: PARAMS,
     animLabel: 'Wind',
-    animHint: 'How hard the wind blows: the grass bends, the strokes sway and drift, the edges roll (0: still)',
+    animHint: 'How hard the wind blows: every layer sways back and forth like tufts of grass (0: still)',
     defaults: {
-      anim: { amount: 1, fps: 30, frames: 120 }, // 4 s loops at 30 frames a second
+      palette: 'Pasture', // the preset the style opens on (its card's colors)
+      anim: { amount: 0.4, fps: 26, frames: 120 }, // loops of about 4.6 s at 26 frames a second
       fx: {},
     },
     paint,
@@ -13542,7 +13568,7 @@ PL.app = (() => {
   const SIZES = [1080, 1600, 2048, 3000, 4096];
   const MAX_AREA = 16777216; // Safari's canvas limit (4096 x 4096)
   const OUTPUT_DEFAULTS = { ratio: '1:1', size: 2048, cw: 1584, ch: 396, render: 'smooth', transparent: false, videoSize: 1080, loops: 3 };
-  const FIRST_SEEDS = { sonar: 642061, culture: 9, cipher: 5, dahlia: 7, coral: 3, whorl: 13, splice: 31, filament: 24, stipple: 654102, rise: 1, prism: 103116, motley: 386649, warp: 1, stitch: 25, quilt: 12, modular: 414828, husk: 2, mist: 3, atlas: 1420, strand: 8, sear: 20, crowd: 10, aura: 2, cobble: 5, brush: 1 };
+  const FIRST_SEEDS = { sonar: 642061, culture: 9, cipher: 5, dahlia: 7, coral: 3, whorl: 13, splice: 31, filament: 24, stipple: 654102, rise: 1, prism: 103116, motley: 386649, warp: 1, stitch: 25, quilt: 12, modular: 414828, husk: 2, mist: 3, atlas: 1420, strand: 8, sear: 20, crowd: 10, aura: 2, cobble: 5, brush: 153043 };
   const firstSeed = (id) => FIRST_SEEDS[id] || 1; // the seed of each tool's default look
 
   /* -------------------------------------------------------------- user data */
