@@ -788,7 +788,7 @@
   PL.tools.register({
     id: 'brush',
     name: 'Brush',
-    kind: 'Organic',
+    kind: 'Pop art',
     tagline: 'Layered brush strokes',
     about: 'Layers of paint laid on in brush strokes, from the back to the front like a landscape: streaky, dry-brushed strokes with ragged ends, grassy flicks along every edge and patches of the neighbouring colors, with the canvas showing through in fine specks. In the animation the wind runs through it: every layer sways back and forth like tufts of grass.',
     raster: true,

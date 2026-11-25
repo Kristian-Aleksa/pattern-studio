@@ -108,7 +108,7 @@ PL.app = (() => {
   const SIZES = [1080, 1600, 2048, 3000, 4096];
   const MAX_AREA = 16777216; // Safari's canvas limit (4096 x 4096)
   const OUTPUT_DEFAULTS = { ratio: '1:1', size: 2048, cw: 1584, ch: 396, render: 'smooth', transparent: false, videoSize: 1080, loops: 3 };
-  const FIRST_SEEDS = { sonar: 642061, culture: 9, cipher: 5, dahlia: 7, coral: 3, whorl: 13, splice: 31, filament: 24, stipple: 654102, rise: 1, prism: 103116, motley: 386649, warp: 1, stitch: 25, quilt: 12, modular: 414828, husk: 2, mist: 3, atlas: 1420, strand: 8, sear: 20, crowd: 10, aura: 2, cobble: 5, brush: 153043, topographic: 14 };
+  const FIRST_SEEDS = { sonar: 642061, culture: 9, cipher: 5, dahlia: 7, coral: 3, whorl: 13, splice: 31, filament: 24, stipple: 654102, rise: 1, prism: 103116, motley: 386649, warp: 1, stitch: 25, quilt: 12, modular: 414828, husk: 2, mist: 3, atlas: 1420, strand: 8, sear: 20, crowd: 10, aura: 2, cobble: 5, brush: 153043, topographic: 14, vein: 9 };
   const firstSeed = (id) => FIRST_SEEDS[id] || 1; // the seed of each tool's default look
 
   /* -------------------------------------------------------------- user data */

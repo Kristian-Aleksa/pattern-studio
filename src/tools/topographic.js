@@ -28,7 +28,7 @@
   const lerp = (a, b, t) => a + (b - a) * t;
 
   // The ground, the grid, the lines from the low ground to the high, the index lines, then the marks.
-  // The default look uses Forest (defaults.palette).
+  // The default look uses Moss (defaults.palette).
   const PALETTES = [
     { name: 'Forest', colors: ['#092300', '#1F3B15', '#57723F', '#738D5C', '#9DB063', '#D5E8B1'] },
     { name: 'Survey', colors: ['#F3ECDD', '#E3D7C2', '#C7A47B', '#A97C4F', '#6B4426', '#2D6CB0'] },
@@ -449,7 +449,7 @@
     animLabel: 'Amount',
     animHint: 'How much the terrain rises and falls over the loop (0: still)',
     defaults: {
-      palette: 'Forest', // the preset the style opens on (its card's colors)
+      palette: 'Moss', // the preset the style opens on (its card's colors)
       anim: { amount: 0.6, fps: 30, frames: 240 }, // an 8 s loop
       fx: {},
     },
