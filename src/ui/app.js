@@ -108,8 +108,11 @@ PL.app = (() => {
   const SIZES = [1080, 1600, 2048, 3000, 4096];
   const MAX_AREA = 16777216; // Safari's canvas limit (4096 x 4096)
   const OUTPUT_DEFAULTS = { ratio: '1:1', size: 2048, cw: 1584, ch: 396, render: 'smooth', transparent: false, videoSize: 1080, loops: 3 };
-  const FIRST_SEEDS = { sonar: 642061, culture: 9, cipher: 5, dahlia: 7, coral: 3, whorl: 13, splice: 31, filament: 24, stipple: 654102, rise: 1, prism: 103116, motley: 386649, warp: 1, stitch: 25, quilt: 12, modular: 414828, husk: 2, mist: 3, atlas: 1420, strand: 8, sear: 20, crowd: 10, aura: 2, cobble: 5, brush: 153043, topographic: 14, vein: 9, station: 29, fuzz: 25 };
+  const FIRST_SEEDS = { sonar: 642061, culture: 9, cipher: 5, dahlia: 7, coral: 3, whorl: 13, splice: 31, filament: 24, stipple: 654102, rise: 1, prism: 103116, motley: 386649, warp: 1, stitch: 25, quilt: 12, modular: 414828, husk: 2, mist: 3, atlas: 1420, strand: 8, sear: 20, crowd: 10, aura: 2, cobble: 5, brush: 153043, topographic: 14, vein: 9, station: 29, fuzz: 25, flow: 818223 };
   const firstSeed = (id) => FIRST_SEEDS[id] || 1; // the seed of each tool's default look
+  // the frame of its loop each tool's default look shows (on its card, and when it opens): frame 1, unless the
+  // tool names another (defaults.frame), within the loop of st (the look)
+  const firstFrame = (tl, st) => clamp(tl.defaults.frame | 0, 0, Math.max(0, (st.anim.frames | 0) - 1));
 
   /* -------------------------------------------------------------- user data */
   // Your palettes, kept variations and each style's last settings. They're saved in this browser on this device
@@ -1905,7 +1908,7 @@ PL.app = (() => {
     if (keepFrame) fresh.output = Object.assign({}, S.output, { render: fresh.output.render, transparent: fresh.output.transparent });
     const changed = JSON.stringify(fresh) !== JSON.stringify(S);
     S = states[tool.id] = fresh;
-    frameIdx = 0;
+    frameIdx = firstFrame(tool, S);
     lastPresetIdx = -1;
     return changed;
   }
@@ -2003,9 +2006,10 @@ PL.app = (() => {
 
   /* ------------------------------------------------------------ hover previews */
   // Play a state's loop with draw(frame) while the pointer (or keyboard focus)
-  // rests on `el`; back to frame 1 when it leaves. (`el` carries the class "playing" meanwhile.)
-  function hoverLoop(el, draw, st) {
-    let timer = 0, f = 0;
+  // rests on `el`, from frame f0 (its first: frame 1, or the style's own); back to it when the
+  // pointer leaves. (`el` carries the class "playing" meanwhile.)
+  function hoverLoop(el, draw, st, f0 = 0) {
+    let timer = 0, f = f0;
     const wait = () => 1000 / Math.max(1, st.anim.fps || 12);
     const start = () => {
       if (timer || playAll) return; // Play previews already plays every card
@@ -2013,7 +2017,7 @@ PL.app = (() => {
       const step = () => { f = (f + 1) % Math.max(1, st.anim.frames | 0); draw(f); timer = setTimeout(step, wait()); };
       timer = setTimeout(step, wait());
     };
-    const stop = () => { clearTimeout(timer); timer = 0; el.classList.remove('playing'); if (f) { f = 0; draw(0); } };
+    const stop = () => { clearTimeout(timer); timer = 0; el.classList.remove('playing'); if (f !== f0) { f = f0; draw(f0); } };
     // Not on touch screens: there a tap would first count as hover, and some phones then skip the tap
     // (the Home cards play there on their own, see moveCards).
     if (!NO_HOVER) {
@@ -2119,7 +2123,7 @@ PL.app = (() => {
     if (entering && booted && keepOnOpen !== tl.id) {
       commit();
       reset = freshLook(false);
-    }
+    } else if (!booted && JSON.stringify(S) === JSON.stringify(defaultState(tool, firstSeed(tool.id)))) frameIdx = firstFrame(tool, S); // (the file opening on a default look: its frame too)
     keepOnOpen = null;
     // On a phone the whole page scrolls: a style opens at the top, its preview in view (not wherever
     // the Home page had been scrolled to)
@@ -2185,7 +2189,7 @@ PL.app = (() => {
       for (let k = 0; k < due.length; k++) {
         if (k && performance.now() > until) break;
         const x = due[(turn + k) % due.length];
-        const f = Math.floor((Math.max(0, now - t0) / 1000) * Math.max(1, x.st.anim.fps || 12)) % Math.max(1, x.st.anim.frames | 0);
+        const f = ((x.start | 0) + Math.floor((Math.max(0, now - t0) / 1000) * Math.max(1, x.st.anim.fps || 12))) % Math.max(1, x.st.anim.frames | 0);
         if (f !== x.frame) { x.draw(f); x.frame = f; }
       }
       turn = due.length ? (turn + 1) % due.length : 0;
@@ -2196,7 +2200,7 @@ PL.app = (() => {
       stop() {
         cancelAnimationFrame(raf);
         if (obs) obs.disconnect();
-        items.forEach((x) => { x.card.classList.remove('playing'); if (x.frame) { x.frame = 0; x.draw(0); } });
+        items.forEach((x) => { x.card.classList.remove('playing'); if (x.frame !== (x.start | 0)) { x.frame = x.start | 0; x.draw(x.frame); } });
       },
     };
   }
@@ -2332,10 +2336,11 @@ PL.app = (() => {
           if (c.canvas.height !== H) c.canvas.height = H;
           try { renderInto(c.canvas.getContext('2d'), W, H, st, frame, { preview: true, opaque: true }); } catch (e) { /* decorative */ }
         };
-        draw(0);
-        const anim = hoverLoop(c.card, draw, st);
+        const f0 = firstFrame(c.t, st);
+        draw(f0);
+        const anim = hoverLoop(c.card, draw, st, f0);
         cardAnims.push(anim);
-        homeCards.push({ card: c.card, draw, st, anim, frame: 0 });
+        homeCards.push({ card: c.card, draw, st, anim, frame: f0, start: f0 });
       }
       applyPreviewMode(); // Play previews, or still cards that play when you point at one
     });
